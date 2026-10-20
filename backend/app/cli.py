@@ -36,8 +36,8 @@ def cli():
 @cli.command()
 @click.argument("target_path", default=".", type=click.Path(exists=True))
 @click.option("--name", default="CLI Scan", help="Project name")
-@click.option("--fail-on-critical", is_flag=True, default=True, help="Exit with non-zero code if critical bugs are found")
-@click.option("--ai-fixes", is_flag=True, default=True, help="Generate AI remediation and diffs")
+@click.option("--fail-on-critical/--no-fail-on-critical", default=True, help="Exit with non-zero code if critical bugs are found")
+@click.option("--ai-fixes/--no-ai-fixes", default=True, help="Generate AI remediation and diffs")
 @click.option("--output", default=None, help="Save report to file (e.g. report.md, report.json)")
 def scan(target_path, name, fail_on_critical, ai_fixes, output):
     """Scan a codebase for bugs, code smells, duplications, and hotspot risks."""
