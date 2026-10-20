@@ -1,0 +1,32 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+data/
+*.db
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+test-results.xml
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.npm
+npm-debug.log*
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

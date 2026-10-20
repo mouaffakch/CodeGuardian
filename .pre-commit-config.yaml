@@ -1,0 +1,12 @@
+# CodeGuardian Pre-Commit Hook configuration
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+repos:
+  - repo: local
+    hooks:
+      - id: codeguardian-scan
+        name: CodeGuardian Pre-Commit Defect Scanner
+        entry: python backend/app/cli.py scan . --fail-on-critical
+        language: python
+        types: [python, javascript]
+        pass_filenames: false

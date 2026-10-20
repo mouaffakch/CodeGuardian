@@ -1,0 +1,37 @@
+stages:
+  - test
+  - quality-gate
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - backend/.venv/
+
+unit-tests:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - python -m venv backend/.venv
+    - source backend/.venv/bin/activate
+    - pip install -r backend/requirements.txt
+    - pytest backend/tests -v
+  artifacts:
+    reports:
+      junit: test-results.xml
+
+codeguardian-scan:
+  stage: quality-gate
+  image: python:3.12-slim
+  before_script:
+    - apt-get update && apt-get install -y git
+  script:
+    - source backend/.venv/bin/activate
+    - python backend/app/cli.py scan . --name "GitLab CI Scan" --output codeguardian-report.json --fail-on-critical
+  artifacts:
+    name: "codeguardian-report-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - codeguardian-report.json
+    expire_in: 30 days

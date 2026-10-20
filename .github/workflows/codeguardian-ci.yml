@@ -1,0 +1,49 @@
+name: CodeGuardian Smart Code Analysis & Quality Gate
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test-and-analyze:
+    name: Test & Static Bug Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full git history for churn & risk prediction
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Backend Unit Tests
+        run: |
+          pytest backend/tests -v --junitxml=test-results.xml
+
+      - name: Run CodeGuardian Smart Static & Risk Scan
+        run: |
+          python backend/app/cli.py scan . \
+            --name "GitHub Action CI Scan" \
+            --output codeguardian-report.md \
+            --fail-on-critical
+
+      - name: Upload Analysis Report Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeguardian-report
+          path: |
+            codeguardian-report.md
+            test-results.xml
