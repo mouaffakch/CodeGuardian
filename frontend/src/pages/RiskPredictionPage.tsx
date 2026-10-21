@@ -43,7 +43,7 @@ export const RiskPredictionPage: React.FC<RiskPredictionPageProps> = ({ hotspots
           return (
             <div
               key={hotspot.id || idx}
-              className="bg-slate-900/80 border border-slate-800 hover:border-slate-700 rounded-2xl p-5 backdrop-blur space-y-4"
+              className="glass-panel hover:bg-slate-900/80 rounded-2xl p-5 space-y-4 transition-all duration-300"
             >
               {/* Card Header */}
               <div className="flex items-start justify-between">

@@ -19,7 +19,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ runs, currentRunId, on
     <div className="space-y-6">
       
       {/* Header */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur flex items-center justify-between">
+      <div className="glass-panel rounded-2xl p-6 flex items-center justify-between transition-all duration-300">
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
             <History className="w-5 h-5 text-cyan-400" />
@@ -34,7 +34,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ runs, currentRunId, on
       </div>
 
       {/* Runs Table */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden backdrop-blur">
+      <div className="glass-panel rounded-2xl overflow-hidden transition-all duration-300">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-950/80 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800">

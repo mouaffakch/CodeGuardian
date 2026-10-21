@@ -60,7 +60,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left Column: Top Priority Defects */}
-        <div className="lg:col-span-2 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur">
+        <div className="lg:col-span-2 glass-panel rounded-2xl p-6 transition-all duration-300">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">Défauts Prioritaires à Corriger</h3>
@@ -80,7 +80,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               <div
                 key={defect.id || `${defect.file_path}-${defect.line_number}`}
                 onClick={() => onSelectDefect(defect)}
-                className="group p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-cyan-500/50 hover:bg-slate-800/60 cursor-pointer transition flex items-start justify-between"
+                className="group p-3.5 rounded-xl bg-slate-950/50 border border-white/[0.06] hover:border-cyan-500/40 hover:bg-white/[0.04] cursor-pointer transition flex items-start justify-between"
               >
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
@@ -104,7 +104,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[11px] font-bold text-cyan-400 bg-cyan-950/60 px-2 py-1 rounded-md border border-cyan-800/50 group-hover:bg-cyan-600 group-hover:text-white transition">
+                  <span className="text-[11px] font-bold text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-800/50 group-hover:bg-cyan-500 group-hover:text-black transition shadow-sm">
                     Voir Fix IA →
                   </span>
                 </div>
@@ -124,7 +124,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <div className="space-y-6">
           
           {/* Top Predictive Hotspots Card */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur">
+          <div className="glass-panel rounded-2xl p-6 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <Flame className="w-4 h-4 text-orange-400" />
@@ -141,7 +141,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
             <div className="space-y-3">
               {(latestRun.hotspots || []).slice(0, 4).map((h, i) => (
-                <div key={i} className="p-3 bg-slate-950/50 rounded-xl border border-slate-800/80">
+                <div key={i} className="p-3 bg-slate-950/50 rounded-xl border border-white/[0.05]">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-mono text-slate-300 truncate max-w-[170px]" title={h.file_path}>
                       {h.file_path}
@@ -167,13 +167,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           {/* Issue Categories Breakdown */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur">
+          <div className="glass-panel rounded-2xl p-6 transition-all duration-300">
             <h3 className="text-sm font-bold text-white mb-3">Répartition par Catégorie</h3>
             <div className="space-y-2">
               {Object.entries(stats?.category_breakdown || {}).map(([cat, count]) => (
                 <div key={cat} className="flex items-center justify-between text-xs">
                   <span className="text-slate-400 font-medium capitalize">{cat.toLowerCase().replace('_', ' ')}</span>
-                  <span className="font-bold text-slate-200 bg-slate-800 px-2 py-0.5 rounded-full">{count}</span>
+                  <span className="font-bold text-slate-200 bg-white/[0.06] border border-white/[0.06] px-2 py-0.5 rounded-full">{count}</span>
                 </div>
               ))}
             </div>

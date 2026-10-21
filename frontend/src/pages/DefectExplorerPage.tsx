@@ -59,7 +59,7 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
     <div className="space-y-6">
       
       {/* Search & Filters */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 backdrop-blur flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="glass-panel rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-center transition-all duration-300">
         
         {/* Search */}
         <div className="relative w-full md:w-96">
@@ -69,7 +69,7 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher par règle, titre, fichier ou mot-clé..."
-            className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+            className="w-full bg-slate-950/70 border border-white/[0.08] rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
           />
         </div>
 
@@ -79,7 +79,7 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
           <select
             value={selectedSeverity}
             onChange={(e) => setSelectedSeverity(e.target.value)}
-            className="bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500"
+            className="bg-slate-950/80 border border-white/[0.08] text-xs text-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500"
           >
             <option value="ALL">Toutes Sévérités</option>
             <option value="CRITICAL">🔴 Critique</option>
@@ -92,7 +92,7 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500"
+            className="bg-slate-950/80 border border-white/[0.08] text-xs text-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500"
           >
             <option value="ALL">Toutes Catégories</option>
             <option value="SECURITY">Sécurité</option>
@@ -115,7 +115,7 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
           <div
             key={defect.id || `${defect.file_path}-${defect.line_number}-${defect.rule_id}`}
             onClick={() => onSelectDefect(defect)}
-            className="group bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-850 p-5 rounded-2xl cursor-pointer transition shadow-sm backdrop-blur flex flex-col md:flex-row md:items-center justify-between gap-4"
+            className="group glass-panel hover:bg-slate-900/80 p-5 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-4"
           >
             <div className="space-y-2 flex-1">
               <div className="flex flex-wrap items-center gap-2">

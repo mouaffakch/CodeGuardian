@@ -41,7 +41,7 @@ export const DuplicationPage: React.FC<DuplicationPageProps> = ({
         {duplications.map((dup, idx) => (
           <div
             key={dup.id || idx}
-            className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 backdrop-blur space-y-4"
+            className="glass-panel hover:bg-slate-900/80 rounded-2xl p-5 space-y-4 transition-all duration-300"
           >
             {/* Clones Pair Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">

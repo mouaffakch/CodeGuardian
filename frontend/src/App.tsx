@@ -75,23 +75,44 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0f1d] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#060913] text-slate-100 relative overflow-hidden">
       
+      {/* 🌌 High-Tech Attractive Background Layer */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Subtle Cyber Grid Pattern */}
+        <div className="absolute inset-0 cyber-grid opacity-70" />
+        
+        {/* Ambient Glow Orbs */}
+        <div className="absolute -top-32 -left-32 w-[650px] h-[550px] bg-gradient-to-br from-cyan-500/20 via-cyan-600/10 to-transparent rounded-full blur-[130px] animate-ambient" />
+        <div className="absolute top-1/4 -right-32 w-[600px] h-[550px] bg-gradient-to-bl from-emerald-500/15 via-teal-600/10 to-transparent rounded-full blur-[140px] animate-ambient" style={{ animationDelay: '3s' }} />
+        <div className="absolute -bottom-32 left-1/3 w-[700px] h-[500px] bg-gradient-to-t from-indigo-600/15 via-blue-900/10 to-transparent rounded-full blur-[150px] animate-ambient" style={{ animationDelay: '6s' }} />
+        
+        {/* Subtle Top Accent Horizon Line */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+      </div>
+
       {/* Top Navbar */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onOpenScanModal={() => setIsScanModalOpen(true)}
-        onOpenCiCdModal={() => setIsCiCdModalOpen(true)}
-        currentBranch={currentRun?.branch || 'main'}
-      />
+      <div className="relative z-20">
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onOpenScanModal={() => setIsScanModalOpen(true)}
+          onOpenCiCdModal={() => setIsCiCdModalOpen(true)}
+          currentBranch={currentRun?.branch || 'main'}
+        />
+      </div>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {loading && !currentRun ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-3">
-            <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin" />
-            <span className="text-sm text-slate-400 font-medium">Chargement des données CodeGuardian...</span>
+          <div className="flex flex-col items-center justify-center py-28 space-y-4">
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center animate-pulse">
+                <RefreshCw className="w-6 h-6 text-cyan-400 animate-spin" />
+              </div>
+              <div className="absolute -inset-1 bg-cyan-500/20 rounded-2xl blur-lg -z-10 animate-pulse" />
+            </div>
+            <span className="text-sm text-slate-300 font-medium tracking-wide">Chargement de l'environnement CodeGuardian...</span>
           </div>
         ) : (
           <>
@@ -136,10 +157,13 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-[#090d19] py-5 text-center text-xs text-slate-500">
-        <p>
-          🛡️ <strong className="text-slate-400">CodeGuardian</strong> — Plateforme Intelligente d'Analyse Statique, Détection de Défauts & Prédiction de Risques.
+      {/* Footer with Glass Effect */}
+      <footer className="border-t border-white/[0.07] bg-[#070b16]/70 backdrop-blur-md py-5 text-center text-xs text-slate-400 relative z-10">
+        <p className="flex items-center justify-center space-x-1.5">
+          <span>🛡️</span>
+          <strong className="text-slate-200">CodeGuardian</strong>
+          <span className="text-slate-500">•</span>
+          <span className="text-slate-400">Plateforme Intelligente d'Analyse Statique, Détection de Défauts & Prédiction de Risques</span>
         </p>
       </footer>
 
