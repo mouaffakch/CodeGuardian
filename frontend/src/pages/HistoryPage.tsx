@@ -84,9 +84,15 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ runs, currentRunId, on
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-rose-400 font-bold">🔴 {run.critical_count}</span>
-                        <span className="text-amber-400 font-bold">🟠 {run.high_count}</span>
+                      <div className="flex items-center space-x-2.5">
+                        <span className="flex items-center text-rose-400 font-bold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5" />
+                          {run.critical_count}
+                        </span>
+                        <span className="flex items-center text-amber-400 font-bold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5" />
+                          {run.high_count}
+                        </span>
                         <span className="text-slate-400">({run.total_issues} total)</span>
                       </div>
                     </td>

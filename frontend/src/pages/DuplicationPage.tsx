@@ -47,11 +47,11 @@ export const DuplicationPage: React.FC<DuplicationPageProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
               <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
                 <span className="bg-slate-800 px-2.5 py-1 rounded-md text-cyan-400 border border-slate-700">
-                  📄 {dup.file_a}:{dup.start_line_a}-{dup.end_line_a}
+                  {dup.file_a}:{dup.start_line_a}-{dup.end_line_a}
                 </span>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-500" />
                 <span className="bg-slate-800 px-2.5 py-1 rounded-md text-indigo-400 border border-slate-700">
-                  📄 {dup.file_b}:{dup.start_line_b}-{dup.end_line_b}
+                  {dup.file_b}:{dup.start_line_b}-{dup.end_line_b}
                 </span>
               </div>
 

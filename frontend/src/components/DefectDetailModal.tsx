@@ -134,11 +134,11 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="bg-slate-900/60 p-3.5 rounded-lg border border-slate-800">
-                <span className="font-semibold text-slate-300 block mb-1">🔍 Cause Racine :</span>
+                <span className="font-semibold text-slate-300 block mb-1">Cause racine :</span>
                 <p className="text-slate-400 leading-relaxed">{aiFixData.rootCause}</p>
               </div>
               <div className="bg-slate-900/60 p-3.5 rounded-lg border border-slate-800">
-                <span className="font-semibold text-slate-300 block mb-1">💡 Explication Détaillée :</span>
+                <span className="font-semibold text-slate-300 block mb-1">Explication technique :</span>
                 <p className="text-slate-400 leading-relaxed">{aiFixData.explanation}</p>
               </div>
             </div>
@@ -146,7 +146,7 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
             {/* Best Practices */}
             {aiFixData.bestPractices.length > 0 && (
               <div className="mt-4 pt-4 border-t border-slate-800/60">
-                <span className="text-xs font-semibold text-slate-300 block mb-2">🛡️ Bonnes Pratiques Recommandées :</span>
+                <span className="text-xs font-semibold text-slate-300 block mb-2">Recommandations de sécurité & qualité :</span>
                 <ul className="space-y-1.5 text-xs text-slate-400">
                   {aiFixData.bestPractices.map((bp, i) => (
                     <li key={i} className="flex items-center space-x-2">

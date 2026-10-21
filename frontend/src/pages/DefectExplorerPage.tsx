@@ -82,10 +82,10 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
             className="bg-slate-950/80 border border-white/[0.08] text-xs text-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500"
           >
             <option value="ALL">Toutes Sévérités</option>
-            <option value="CRITICAL">🔴 Critique</option>
-            <option value="HIGH">🟠 Haute</option>
-            <option value="MEDIUM">🟡 Moyenne</option>
-            <option value="LOW">🔵 Basse</option>
+            <option value="CRITICAL">Critique</option>
+            <option value="HIGH">Haute</option>
+            <option value="MEDIUM">Moyenne</option>
+            <option value="LOW">Basse</option>
           </select>
 
           {/* Category selector */}
@@ -138,8 +138,8 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
               </h4>
               <p className="text-xs text-slate-400 line-clamp-2">{defect.description}</p>
 
-              <div className="flex items-center space-x-3 text-xs text-slate-500 font-mono">
-                <span>📁 {defect.file_path}:{defect.line_number}</span>
+              <div className="flex items-center space-x-3 text-xs text-slate-400 font-mono">
+                <span>{defect.file_path}:{defect.line_number}</span>
               </div>
             </div>
 

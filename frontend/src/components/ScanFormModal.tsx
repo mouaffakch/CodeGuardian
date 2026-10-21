@@ -95,16 +95,16 @@ export const ScanFormModal: React.FC<ScanFormModalProps> = ({ isOpen, onClose, o
               <button
                 type="button"
                 onClick={() => handleSelectSample('sample_project', 'Sample Test Suite')}
-                className="text-xs px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition"
+                className="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition"
               >
-                ⚡ Projet Démo (sample_project)
+                Projet d'exemple (sample_project)
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectSample('backend', 'CodeGuardian Backend')}
-                className="text-xs px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 transition"
+                className="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 transition"
               >
-                🛡️ CodeGuardian Backend Core
+                Backend CodeGuardian
               </button>
             </div>
           </div>

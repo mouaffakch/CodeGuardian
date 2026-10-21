@@ -78,7 +78,7 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#040711] text-slate-100 relative overflow-hidden">
       
-      {/* 🌌 High-Performance Interactive Animated Background */}
+      {/* Interactive Telemetry Canvas Background */}
       <AnimatedBackground />
 
       {/* Top Navbar */}
@@ -149,11 +149,10 @@ export const App: React.FC = () => {
 
       {/* Footer with Glass Effect */}
       <footer className="border-t border-white/[0.07] bg-[#070b16]/70 backdrop-blur-md py-5 text-center text-xs text-slate-400 relative z-10">
-        <p className="flex items-center justify-center space-x-1.5">
-          <span>🛡️</span>
-          <strong className="text-slate-200">CodeGuardian</strong>
-          <span className="text-slate-500">•</span>
-          <span className="text-slate-400">Plateforme Intelligente d'Analyse Statique, Détection de Défauts & Prédiction de Risques</span>
+        <p className="flex items-center justify-center space-x-2">
+          <span className="font-semibold text-slate-200">CodeGuardian</span>
+          <span className="text-slate-600">|</span>
+          <span className="text-slate-400">Plateforme d'Analyse Statique, Détection de Vulnérabilités & Audit Logiciel</span>
         </p>
       </footer>
 

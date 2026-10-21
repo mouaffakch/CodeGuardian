@@ -108,12 +108,12 @@ repos:
         </div>
 
         {/* Tab Selector */}
-        <div className="flex border-b border-slate-800 bg-slate-900/30 px-6 pt-3 space-x-4 text-xs font-semibold">
+        <div className="flex border-b border-slate-800 bg-slate-900/30 px-6 pt-3 space-x-6 text-xs font-semibold">
           {[
-            { id: 'cli', label: '💻 CLI & Terminal' },
-            { id: 'github', label: '🐙 GitHub Actions' },
-            { id: 'gitlab', label: '🦊 GitLab CI' },
-            { id: 'precommit', label: '🪝 Git Pre-commit Hook' },
+            { id: 'cli', label: 'CLI & Terminal' },
+            { id: 'github', label: 'GitHub Actions' },
+            { id: 'gitlab', label: 'GitLab CI' },
+            { id: 'precommit', label: 'Git Pre-commit Hook' },
           ].map((t) => (
             <button
               key={t.id}

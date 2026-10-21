@@ -105,7 +105,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
                 <div className="text-right">
                   <span className="text-[11px] font-bold text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-800/50 group-hover:bg-cyan-500 group-hover:text-black transition shadow-sm">
-                    Voir Fix IA →
+                    Détails & Correctif →
                   </span>
                 </div>
               </div>

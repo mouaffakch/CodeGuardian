@@ -68,11 +68,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Action CTAs - Well spaced & uncluttered */}
           <div className="flex items-center space-x-3.5">
-            <div className="hidden sm:flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/[0.07] text-xs text-slate-300">
-              <GitBranch className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="font-mono text-xs text-slate-300">{currentBranch}</span>
-            </div>
-
             <button
               onClick={onOpenCiCdModal}
               className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/30 transition flex items-center space-x-2 shadow-sm active:scale-95"
