@@ -80,7 +80,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
       <div className="glass-panel rounded-2xl p-5 relative overflow-hidden transition-all duration-300 group">
         <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl -z-10 group-hover:bg-orange-500/20 transition" />
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Fichiers à Haut Risque (IA)</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Fichiers à Risque Élevé</span>
           <Flame className="w-4 h-4 text-orange-400" />
         </div>
         <div className="mt-3 flex items-baseline space-x-2">

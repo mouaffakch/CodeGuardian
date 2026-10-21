@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
+import { AnimatedBackground } from './components/AnimatedBackground';
 import { DashboardPage } from './pages/DashboardPage';
 import { DefectExplorerPage } from './pages/DefectExplorerPage';
 import { RiskPredictionPage } from './pages/RiskPredictionPage';
@@ -75,21 +76,10 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#060913] text-slate-100 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-[#040711] text-slate-100 relative overflow-hidden">
       
-      {/* 🌌 High-Tech Attractive Background Layer */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Subtle Cyber Grid Pattern */}
-        <div className="absolute inset-0 cyber-grid opacity-70" />
-        
-        {/* Ambient Glow Orbs */}
-        <div className="absolute -top-32 -left-32 w-[650px] h-[550px] bg-gradient-to-br from-cyan-500/20 via-cyan-600/10 to-transparent rounded-full blur-[130px] animate-ambient" />
-        <div className="absolute top-1/4 -right-32 w-[600px] h-[550px] bg-gradient-to-bl from-emerald-500/15 via-teal-600/10 to-transparent rounded-full blur-[140px] animate-ambient" style={{ animationDelay: '3s' }} />
-        <div className="absolute -bottom-32 left-1/3 w-[700px] h-[500px] bg-gradient-to-t from-indigo-600/15 via-blue-900/10 to-transparent rounded-full blur-[150px] animate-ambient" style={{ animationDelay: '6s' }} />
-        
-        {/* Subtle Top Accent Horizon Line */}
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
-      </div>
+      {/* 🌌 High-Performance Interactive Animated Background */}
+      <AnimatedBackground />
 
       {/* Top Navbar */}
       <div className="relative z-20">

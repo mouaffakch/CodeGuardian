@@ -128,7 +128,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <Flame className="w-4 h-4 text-orange-400" />
-                <h3 className="text-sm font-bold text-white tracking-tight">Prédiction des Risques (IA)</h3>
+                <h3 className="text-sm font-bold text-white tracking-tight">Analyse Prédictive des Risques</h3>
               </div>
               <button
                 onClick={() => onNavigateTab('hotspots')}
