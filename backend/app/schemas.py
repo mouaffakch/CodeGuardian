@@ -88,6 +88,7 @@ class ScanRequest(BaseModel):
     target_path: Optional[str] = None
     project_name: Optional[str] = "CodeGuardian Target"
     include_ai_fixes: bool = True
+    diff_only: bool = False
 
 class AIFixRequest(BaseModel):
     defect_id: Optional[int] = None
@@ -106,6 +107,16 @@ class AIFixResponse(BaseModel):
     diff: str
     confidence_score: float
     best_practices: List[str] = []
+
+class ApplyFixRequest(BaseModel):
+    defect_id: int
+    fixed_code: Optional[str] = None
+
+class ApplyFixResponse(BaseModel):
+    success: bool
+    message: str
+    file_path: str
+    backup_path: Optional[str] = None
 
 class DashboardSummaryResponse(BaseModel):
     total_projects: int

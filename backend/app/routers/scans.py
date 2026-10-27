@@ -22,6 +22,7 @@ from app.core.duplication_detector import duplication_detector
 from app.core.git_analyzer import git_analyzer
 from app.core.bug_predictor import bug_predictor
 from app.core.ai_engine import ai_engine
+from app.core.sca_scanner import sca_scanner
 from app.config import WORKSPACE_ROOT
 
 router = APIRouter(prefix="/api/scans", tags=["Scans"])
@@ -60,6 +61,9 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
     commit_hash = repo_info.get("commit_hash", "HEAD")
     churn_data = git_analyzer.analyze_file_churn(str(target_dir))
 
+    # Incremental PR Diff Filter
+    changed_files = set(git_analyzer.get_changed_files(str(target_dir))) if req.diff_only else None
+
     # 4. Traverse Files
     file_contents: Dict[str, str] = {}
     file_metrics: Dict[str, Dict[str, Any]] = {}
@@ -77,6 +81,10 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
                 continue
 
             full_path = os.path.join(root, file)
+            rel_check = os.path.relpath(full_path, target_dir).replace("\\", "/")
+            if changed_files is not None and rel_check not in changed_files:
+                continue
+
             # Skip massive files > 2MB
             try:
                 if os.path.getsize(full_path) > 2 * 1024 * 1024:
@@ -97,6 +105,10 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
                     file_contents[rel_p] = f.read()
             except Exception:
                 pass
+
+    # 4.b Software Composition Analysis (SCA) - Dependency Vulnerabilities
+    sca_findings = sca_scanner.scan_directory(str(target_dir))
+    all_defects.extend(sca_findings)
 
     # 5. Duplication Detection
     dup_result = duplication_detector.find_duplications(file_contents)

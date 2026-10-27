@@ -119,4 +119,34 @@ class GitAnalyzer:
 
         return churn_data
 
+    def get_changed_files(self, repo_path: str) -> List[str]:
+        """Returns relative paths of changed files in working tree or last commit (PR diff)."""
+        if not self.is_available:
+            return []
+
+        changed = set()
+        try:
+            repo = git.Repo(repo_path, search_parent_directories=True)
+            # 1. Working tree unstaged changes
+            for item in repo.index.diff(None):
+                changed.add(item.a_path.replace("\\", "/"))
+            # 2. Staged changes
+            if repo.head.is_valid():
+                for item in repo.index.diff("HEAD"):
+                    changed.add(item.a_path.replace("\\", "/"))
+                # 3. Last commit diff against parent if working tree is clean
+                if not changed:
+                    parent = repo.head.commit.parents[0] if repo.head.commit.parents else None
+                    if parent:
+                        for diff in parent.diff(repo.head.commit):
+                            if diff.b_path:
+                                changed.add(diff.b_path.replace("\\", "/"))
+            # 4. Untracked files
+            for untracked in repo.untracked_files:
+                changed.add(untracked.replace("\\", "/"))
+        except Exception:
+            pass
+
+        return list(changed)
+
 git_analyzer = GitAnalyzer()

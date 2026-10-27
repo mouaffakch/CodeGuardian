@@ -115,6 +115,15 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ runs, currentRunId, on
                         </button>
 
                         <a
+                          href={`/api/reports/${run.id}/export?format=html`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 text-[11px] font-medium rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+                          title="Imprimer / Enregistrer en PDF"
+                        >
+                          PDF
+                        </a>
+                        <a
                           href={`/api/reports/${run.id}/export?format=markdown`}
                           download={`codeguardian-report-${run.id}.md`}
                           className="px-2 py-1 text-[11px] font-medium rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
@@ -123,21 +132,21 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ runs, currentRunId, on
                           MD
                         </a>
                         <a
-                          href={`/api/reports/${run.id}/export?format=html`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-2 py-1 text-[11px] font-medium rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
-                          title="Voir le rapport HTML interactif"
-                        >
-                          HTML
-                        </a>
-                        <a
                           href={`/api/reports/${run.id}/export?format=json`}
                           download={`codeguardian-report-${run.id}.json`}
                           className="px-2 py-1 text-[11px] font-medium rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
                           title="Télécharger en JSON pour CI/CD"
                         >
                           JSON
+                        </a>
+                        <a
+                          href="/api/reports/badge.svg"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 text-[11px] font-medium rounded bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 border border-cyan-800/60 transition"
+                          title="Voir le badge SVG Shields.io pour le README"
+                        >
+                          Badge
                         </a>
                       </div>
                     </td>

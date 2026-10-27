@@ -1,0 +1,19 @@
+services:
+  codeguardian:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codeguardian-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DEBUG=false
+      - AI_PROVIDER=auto
+    volumes:
+      - codeguardian-data:/app/backend/data
+      - .:/workspace:ro
+
+volumes:
+  codeguardian-data:

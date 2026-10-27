@@ -1,0 +1,14 @@
+.git
+.github
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+backend/data
+node_modules
+frontend/node_modules
+.pytest_cache
+test-results.xml

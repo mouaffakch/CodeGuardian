@@ -26,11 +26,9 @@ from app.database import SessionLocal, init_db
 from app.routers.scans import run_scan
 from app.schemas import ScanRequest
 
-console = Console()
-
 @click.group()
 def cli():
-    """🛡️ CodeGuardian CLI — Smart bug detection & static security analyzer."""
+    """CodeGuardian CLI — Smart bug detection, SCA security & quality analyzer."""
     pass
 
 @cli.command()
@@ -38,21 +36,22 @@ def cli():
 @click.option("--name", default="CLI Scan", help="Project name")
 @click.option("--fail-on-critical/--no-fail-on-critical", default=True, help="Exit with non-zero code if critical bugs are found")
 @click.option("--ai-fixes/--no-ai-fixes", default=True, help="Generate AI remediation and diffs")
+@click.option("--diff-only", is_flag=True, default=False, help="Only scan files modified in Git working tree or PR diff")
 @click.option("--output", default=None, help="Save report to file (e.g. report.md, report.json)")
-def scan(target_path, name, fail_on_critical, ai_fixes, output):
-    """Scan a codebase for bugs, code smells, duplications, and hotspot risks."""
+def scan(target_path, name, fail_on_critical, ai_fixes, diff_only, output):
+    """Scan a codebase for bugs, code smells, duplications, SCA CVEs, and hotspot risks."""
     init_db()
     db = SessionLocal()
     target_abs = str(Path(target_path).resolve())
 
     console.print(Panel(
-        f"[bold cyan]🛡️ CodeGuardian Analysis Engine[/bold cyan]\nTarget: [yellow]{target_abs}[/yellow]",
+        f"[bold cyan]CodeGuardian Analysis Engine[/bold cyan]\nTarget: [yellow]{target_abs}[/yellow]{' (Diff-Only PR mode)' if diff_only else ''}",
         border_style="cyan"
     ))
 
-    with console.status("[bold green]Analyzing AST, calculating metrics, detecting duplications & AI predictions..."):
+    with console.status("[bold green]Analyzing AST, dependencies SCA, calculating metrics, detecting duplications & AI predictions..."):
         try:
-            req = ScanRequest(target_path=target_abs, project_name=name, include_ai_fixes=ai_fixes)
+            req = ScanRequest(target_path=target_abs, project_name=name, include_ai_fixes=ai_fixes, diff_only=diff_only)
             result = run_scan(req, db)
         except Exception as e:
             console.print(f"[bold red]Scan failed:[/bold red] {e}")
@@ -64,11 +63,11 @@ def scan(target_path, name, fail_on_critical, ai_fixes, output):
     health_color = "green" if result.health_score >= 80 else "yellow" if result.health_score >= 60 else "red"
     console.print(f"\n[bold]Health Score:[/bold] [{health_color}]{result.health_score} / 100[/{health_color}]")
     console.print(f"[bold]Total Files:[/bold] {result.total_files} | [bold]LOC:[/bold] {result.lines_of_code} | [bold]Duplication:[/bold] {result.duplication_percentage}%")
-    console.print(f"[bold]Issues:[/bold] 🔴 {result.critical_count} Critical  🟠 {result.high_count} High  🟡 {result.medium_count} Medium  🔵 {result.low_count} Low")
+    console.print(f"[bold]Issues:[/bold] [red]{result.critical_count} Critical[/red] | [yellow]{result.high_count} High[/yellow] | [blue]{result.medium_count} Medium[/blue] | [dim]{result.low_count} Low[/dim]")
 
     # Defects Table
     if result.defects:
-        table = Table(title="🚨 Detected Issues & Code Smells", show_lines=True)
+        table = Table(title="Detected Issues, Security Defects & SCA Vulnerabilities", show_lines=True)
         table.add_column("Severity", style="bold")
         table.add_column("Rule", style="cyan")
         table.add_column("Location")
@@ -88,7 +87,7 @@ def scan(target_path, name, fail_on_critical, ai_fixes, output):
 
     # Hotspots Table
     if result.hotspots:
-        htable = Table(title="🔮 Defect Risk Predictions (Hotspots)", show_lines=True)
+        htable = Table(title="Defect Risk Predictions (Hotspots)", show_lines=True)
         htable.add_column("Risk Level", style="bold")
         htable.add_column("Risk Score")
         htable.add_column("File", style="cyan")
@@ -124,10 +123,10 @@ def scan(target_path, name, fail_on_critical, ai_fixes, output):
 
     # Exit code
     if fail_on_critical and result.critical_count > 0:
-        console.print(f"[bold red]❌ CI/CD Gate Failed:[/bold red] {result.critical_count} critical issues found.")
+        console.print(f"[bold red]Quality Gate Failed:[/bold red] {result.critical_count} critical issues found.")
         sys.exit(1)
     else:
-        console.print("[bold green]✅ Scan passed successfully![/bold green]")
+        console.print("[bold green]Scan passed successfully![/bold green]")
         sys.exit(0)
 
 if __name__ == "__main__":

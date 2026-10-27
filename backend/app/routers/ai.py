@@ -1,16 +1,19 @@
+import os
+import shutil
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Defect
-from app.schemas import AIFixRequest, AIFixResponse
+from app.models import Defect, AnalysisRun, Project
+from app.schemas import AIFixRequest, AIFixResponse, ApplyFixRequest, ApplyFixResponse
 from app.core.ai_engine import ai_engine
+from app.config import WORKSPACE_ROOT
 
 router = APIRouter(prefix="/api/ai", tags=["AI Engine"])
 
 @router.post("/fix", response_model=AIFixResponse)
 def generate_ai_fix(req: AIFixRequest, db: Session = Depends(get_db)):
     """Generate an AI explanation, root cause analysis, code remediation, and unified diff."""
-    # If defect_id was provided and snippet is empty, load from database
     snippet = req.code_snippet
     rule_id = req.rule_id
     description = req.description
@@ -35,7 +38,6 @@ def generate_ai_fix(req: AIFixRequest, db: Session = Depends(get_db)):
         user_instructions=req.user_instructions
     )
 
-    # If associated with a DB defect, optionally persist the fix
     if req.defect_id:
         defect = db.query(Defect).filter(Defect.id == req.defect_id).first()
         if defect:
@@ -53,3 +55,74 @@ def generate_ai_fix(req: AIFixRequest, db: Session = Depends(get_db)):
         confidence_score=result.get("confidence_score", 0.9),
         best_practices=result.get("best_practices", [])
     )
+
+@router.post("/apply-fix", response_model=ApplyFixResponse)
+def apply_fix_to_file(req: ApplyFixRequest, db: Session = Depends(get_db)):
+    """
+    Applies the AI suggested fix directly to the source code on disk.
+    Creates an automatic backup file (.bak) before modifying.
+    Marks the defect as RESOLVED.
+    """
+    defect = db.query(Defect).filter(Defect.id == req.defect_id).first()
+    if not defect:
+        raise HTTPException(status_code=404, detail="Defect not found")
+
+    fixed_code = req.fixed_code or defect.ai_suggested_fix
+    if not fixed_code:
+        raise HTTPException(status_code=400, detail="No suggested fix available for this defect")
+
+    # Locate project root
+    run = db.query(AnalysisRun).filter(AnalysisRun.id == defect.run_id).first()
+    project = db.query(Project).filter(Project.id == run.project_id).first() if run else None
+    base_dir = Path(project.root_path) if project and project.root_path else WORKSPACE_ROOT
+
+    target_file = Path(defect.file_path)
+    if not target_file.is_absolute():
+        target_file = (base_dir / target_file).resolve()
+
+    if not target_file.is_file():
+        # Try checking relative to WORKSPACE_ROOT
+        alt_file = (WORKSPACE_ROOT / defect.file_path).resolve()
+        if alt_file.is_file():
+            target_file = alt_file
+        else:
+            raise HTTPException(status_code=404, detail=f"File not found on disk: {target_file}")
+
+    try:
+        # 1. Create a backup file
+        backup_path = target_file.with_suffix(target_file.suffix + ".bak")
+        shutil.copyfile(target_file, backup_path)
+
+        # 2. Read existing content
+        with open(target_file, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
+
+        # 3. Apply substitution
+        original_snippet = defect.code_snippet
+        if original_snippet and original_snippet.strip() in content:
+            new_content = content.replace(original_snippet.strip(), fixed_code.strip(), 1)
+        else:
+            # Fallback by line number
+            lines = content.splitlines()
+            start = max(0, defect.line_number - 1)
+            end = defect.end_line or (start + 1)
+            lines[start:end] = fixed_code.splitlines()
+            new_content = "\n".join(lines)
+
+        # 4. Save modified file
+        with open(target_file, "w", encoding="utf-8") as f:
+            f.write(new_content)
+
+        # 5. Update defect status in DB
+        defect.status = "RESOLVED"
+        defect.ai_suggested_fix = fixed_code
+        db.commit()
+
+        return ApplyFixResponse(
+            success=True,
+            message=f"Le correctif a été appliqué avec succès sur '{target_file.name}'. Une sauvegarde a été créée.",
+            file_path=str(target_file),
+            backup_path=str(backup_path)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to apply fix: {str(e)}")

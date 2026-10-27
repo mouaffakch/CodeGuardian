@@ -86,6 +86,13 @@ export interface AIFixResponse {
   best_practices: string[];
 }
 
+export interface ApplyFixResult {
+  success: boolean;
+  message: string;
+  file_path: string;
+  backup_path?: string;
+}
+
 const API_BASE = '/api';
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
@@ -106,7 +113,7 @@ export async function fetchScanDetail(id: number): Promise<AnalysisRun> {
   return res.json();
 }
 
-export async function triggerScan(targetPath?: string, projectName?: string): Promise<AnalysisRun> {
+export async function triggerScan(targetPath?: string, projectName?: string, diffOnly: boolean = false): Promise<AnalysisRun> {
   const res = await fetch(`${API_BASE}/scans/run`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -114,6 +121,7 @@ export async function triggerScan(targetPath?: string, projectName?: string): Pr
       target_path: targetPath || '',
       project_name: projectName || 'CodeGuardian Project',
       include_ai_fixes: true,
+      diff_only: diffOnly,
     }),
   });
   if (!res.ok) {
@@ -137,5 +145,21 @@ export async function requestAIFix(params: {
     body: JSON.stringify(params),
   });
   if (!res.ok) throw new Error('Failed to generate AI fix');
+  return res.json();
+}
+
+export async function applyAIFix(defectId: number, fixedCode?: string): Promise<ApplyFixResult> {
+  const res = await fetch(`${API_BASE}/ai/apply-fix`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      defect_id: defectId,
+      fixed_code: fixedCode,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed to apply fix' }));
+    throw new Error(err.detail || 'Failed to apply fix');
+  }
   return res.json();
 }

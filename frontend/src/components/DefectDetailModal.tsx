@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Check, Copy, AlertTriangle, ShieldCheck, Wrench, RefreshCw, ArrowRight } from 'lucide-react';
-import { Defect, requestAIFix } from '../api/client';
+import { X, Sparkles, Check, Copy, AlertTriangle, ShieldCheck, Wrench, RefreshCw, ArrowRight, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Defect, requestAIFix, applyAIFix } from '../api/client';
 
 interface DefectDetailModalProps {
   defect: Defect | null;
   onClose: () => void;
+  onStatusChange?: (defectId: number, newStatus: string) => void;
 }
 
-export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, onClose }) => {
+export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, onClose, onStatusChange }) => {
   if (!defect) return null;
 
   const [copied, setCopied] = useState(false);
   const [loadingFix, setLoadingFix] = useState(false);
+  const [applyingFix, setApplyingFix] = useState(false);
+  const [applyResult, setApplyResult] = useState<{ success: boolean; message: string; backup?: string } | null>(null);
+  const [status, setStatus] = useState<string>(defect.status || 'OPEN');
   const [customPrompt, setCustomPrompt] = useState('');
   const [aiFixData, setAiFixData] = useState<{
     explanation: string;
@@ -66,6 +70,31 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
     }
   };
 
+  const handleApplyFix = async () => {
+    if (!defect.id || !aiFixData.fixedCode) return;
+    setApplyingFix(true);
+    setApplyResult(null);
+    try {
+      const res = await applyAIFix(defect.id, aiFixData.fixedCode);
+      setStatus('RESOLVED');
+      setApplyResult({
+        success: true,
+        message: res.message,
+        backup: res.backup_path
+      });
+      if (onStatusChange) {
+        onStatusChange(defect.id, 'RESOLVED');
+      }
+    } catch (err: any) {
+      setApplyResult({
+        success: false,
+        message: err.message || "Impossible d'appliquer le correctif sur le fichier."
+      });
+    } finally {
+      setApplyingFix(false);
+    }
+  };
+
   const getSeverityBadge = (sev: string) => {
     switch (sev) {
       case 'CRITICAL':
@@ -95,6 +124,12 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
             <span className="text-xs text-slate-400">
               {defect.file_path}:{defect.line_number}
             </span>
+            {status === 'RESOLVED' && (
+              <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center space-x-1">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>RÉSOLU</span>
+              </span>
+            )}
           </div>
 
           <button
@@ -129,7 +164,7 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
           <div className="bg-gradient-to-br from-cyan-950/40 via-slate-900 to-emerald-950/20 border border-cyan-800/40 rounded-xl p-5 relative">
             <div className="flex items-center space-x-2 text-cyan-400 font-bold text-sm mb-3">
               <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>Analyse & Diagnostic IA</span>
+              <span>Analyse & Diagnostic Technique</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -159,22 +194,64 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
             )}
           </div>
 
-          {/* Suggested Fix & Diff */}
+          {/* Suggested Fix & Action Buttons */}
           {aiFixData.fixedCode && (
             <div>
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 gap-2">
                 <div className="flex items-center space-x-2">
                   <Wrench className="w-3.5 h-3.5 text-emerald-400" />
                   <span className="text-emerald-400">Code Corrigé Proposé</span>
                 </div>
-                <button
-                  onClick={() => handleCopy(aiFixData.fixedCode)}
-                  className="flex items-center space-x-1.5 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-md transition"
-                >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copied ? 'Copié !' : 'Copier le code'}</span>
-                </button>
+                
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleCopy(aiFixData.fixedCode)}
+                    className="flex items-center space-x-1.5 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-md transition"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copied ? 'Copié !' : 'Copier'}</span>
+                  </button>
+
+                  <button
+                    onClick={handleApplyFix}
+                    disabled={applyingFix || status === 'RESOLVED'}
+                    className={`flex items-center space-x-1.5 text-xs font-bold px-3.5 py-1.5 rounded-md transition shadow ${
+                      status === 'RESOLVED'
+                        ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 cursor-default'
+                        : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20 active:scale-95'
+                    }`}
+                  >
+                    {applyingFix ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Application...</span>
+                      </>
+                    ) : status === 'RESOLVED' ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Correctif Appliqué</span>
+                      </>
+                    ) : (
+                      <>
+                        <Wrench className="w-3.5 h-3.5" />
+                        <span>Appliquer le correctif (1-Clic)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
+
+              {/* Status Alert */}
+              {applyResult && (
+                <div className={`p-3 rounded-xl mb-3 text-xs border ${
+                  applyResult.success ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/50' : 'bg-rose-950/40 text-rose-300 border-rose-800/50'
+                }`}>
+                  <p className="font-semibold">{applyResult.message}</p>
+                  {applyResult.backup && (
+                    <p className="mt-1 text-[11px] font-mono opacity-80">Sauvegarde créée : {applyResult.backup}</p>
+                  )}
+                </div>
+              )}
 
               <div className="bg-[#070b14] border border-emerald-900/50 rounded-xl p-4 font-mono text-xs text-emerald-300 overflow-x-auto">
                 <pre>{aiFixData.fixedCode}</pre>
@@ -210,14 +287,14 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
           {/* Custom Instruction Box for AI */}
           <div className="pt-2 border-t border-slate-800">
             <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-              Demander un ajustement spécifique à l'IA :
+              Demander un ajustement spécifique :
             </label>
             <div className="flex space-x-2">
               <input
                 type="text"
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="Ex: Utiliser SQLAlchemy 2.0 select() ou adapter pour async/await..."
+                placeholder="Ex: Adapter pour async/await ou utiliser un ORM..."
                 className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
               />
               <button
@@ -237,7 +314,7 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
         <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 rounded-lg hover:bg-slate-700 transition"
+            className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 rounded-lg hover:bg-slate-700 transition"
           >
             Fermer
           </button>
