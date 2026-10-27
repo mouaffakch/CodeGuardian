@@ -75,7 +75,6 @@ class GitAnalyzer:
                 is_bug_fix = any(re.search(pat, msg) for pat in BUG_MESSAGE_PATTERNS)
                 author = commit.author.name or commit.author.email
 
-                # Check stats for this commit
                 try:
                     stats = commit.stats.files
                     for raw_file_path, file_stat in stats.items():
@@ -108,13 +107,11 @@ class GitAnalyzer:
                 except Exception:
                     continue
 
-            # Convert sets to counts for JSON serialization
             for path, data in churn_data.items():
                 data["author_count"] = len(data["authors"])
                 del data["authors"]
 
         except Exception as e:
-            # Fallback gracefully
             pass
 
         return churn_data
@@ -127,21 +124,17 @@ class GitAnalyzer:
         changed = set()
         try:
             repo = git.Repo(repo_path, search_parent_directories=True)
-            # 1. Working tree unstaged changes
             for item in repo.index.diff(None):
                 changed.add(item.a_path.replace("\\", "/"))
-            # 2. Staged changes
             if repo.head.is_valid():
                 for item in repo.index.diff("HEAD"):
                     changed.add(item.a_path.replace("\\", "/"))
-                # 3. Last commit diff against parent if working tree is clean
                 if not changed:
                     parent = repo.head.commit.parents[0] if repo.head.commit.parents else None
                     if parent:
                         for diff in parent.diff(repo.head.commit):
                             if diff.b_path:
                                 changed.add(diff.b_path.replace("\\", "/"))
-            # 4. Untracked files
             for untracked in repo.untracked_files:
                 changed.add(untracked.replace("\\", "/"))
         except Exception:

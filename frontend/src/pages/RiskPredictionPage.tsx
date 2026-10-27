@@ -10,7 +10,6 @@ export const RiskPredictionPage: React.FC<RiskPredictionPageProps> = ({ hotspots
   return (
     <div className="space-y-6">
       
-      {/* Intro Header */}
       <div className="bg-gradient-to-r from-orange-950/40 via-slate-900 to-rose-950/30 border border-orange-800/40 rounded-2xl p-6">
         <div className="flex items-center space-x-3 mb-2">
           <div className="w-9 h-9 rounded-xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center">
@@ -25,7 +24,6 @@ export const RiskPredictionPage: React.FC<RiskPredictionPageProps> = ({ hotspots
         </div>
       </div>
 
-      {/* Hotspots Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {hotspots.map((hotspot, idx) => {
           const isCritical = hotspot.risk_level === 'CRITICAL';
@@ -45,7 +43,6 @@ export const RiskPredictionPage: React.FC<RiskPredictionPageProps> = ({ hotspots
               key={hotspot.id || idx}
               className="glass-panel hover:bg-slate-900/80 rounded-2xl p-5 space-y-4 transition-all duration-300"
             >
-              {/* Card Header */}
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-xs font-mono text-cyan-400 block font-bold truncate max-w-[280px]" title={hotspot.file_path}>
@@ -63,7 +60,6 @@ export const RiskPredictionPage: React.FC<RiskPredictionPageProps> = ({ hotspots
                 </div>
               </div>
 
-              {/* Score Bar */}
               <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
                 <div
                   className={`h-full rounded-full transition-all duration-700 ${
@@ -79,7 +75,6 @@ export const RiskPredictionPage: React.FC<RiskPredictionPageProps> = ({ hotspots
                 />
               </div>
 
-              {/* Factors Grid */}
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/80 flex items-center space-x-2">
                   <GitCommit className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
@@ -118,7 +113,6 @@ export const RiskPredictionPage: React.FC<RiskPredictionPageProps> = ({ hotspots
                 </div>
               </div>
 
-              {/* Reasons / Drivers */}
               {hotspot.reasons && hotspot.reasons.length > 0 && (
                 <div className="pt-2 border-t border-slate-800/70">
                   <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">

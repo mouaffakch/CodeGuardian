@@ -112,7 +112,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
       <div className="bg-[#0f172a] border border-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-8">
         
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
           <div className="flex items-center space-x-3">
             <span className={`text-xs font-bold px-2.5 py-1 rounded-md border ${getSeverityBadge(defect.severity)}`}>
@@ -140,7 +139,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
           </button>
         </div>
 
-        {/* Body */}
         <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
           
           <div>
@@ -148,7 +146,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
             <p className="mt-1 text-sm text-slate-300">{defect.description}</p>
           </div>
 
-          {/* Original Snippet */}
           {defect.code_snippet && (
             <div>
               <div className="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
@@ -160,7 +157,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
             </div>
           )}
 
-          {/* AI Diagnostic Card */}
           <div className="bg-gradient-to-br from-cyan-950/40 via-slate-900 to-emerald-950/20 border border-cyan-800/40 rounded-xl p-5 relative">
             <div className="flex items-center space-x-2 text-cyan-400 font-bold text-sm mb-3">
               <Sparkles className="w-4 h-4 text-cyan-400" />
@@ -178,7 +174,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
               </div>
             </div>
 
-            {/* Best Practices */}
             {aiFixData.bestPractices.length > 0 && (
               <div className="mt-4 pt-4 border-t border-slate-800/60">
                 <span className="text-xs font-semibold text-slate-300 block mb-2">Recommandations de sécurité & qualité :</span>
@@ -194,7 +189,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
             )}
           </div>
 
-          {/* Suggested Fix & Action Buttons */}
           {aiFixData.fixedCode && (
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 gap-2">
@@ -241,7 +235,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
                 </div>
               </div>
 
-              {/* Status Alert */}
               {applyResult && (
                 <div className={`p-3 rounded-xl mb-3 text-xs border ${
                   applyResult.success ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/50' : 'bg-rose-950/40 text-rose-300 border-rose-800/50'
@@ -257,7 +250,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
                 <pre>{aiFixData.fixedCode}</pre>
               </div>
 
-              {/* Unified Diff View */}
               {aiFixData.diff && (
                 <div className="mt-3">
                   <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
@@ -284,7 +276,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
             </div>
           )}
 
-          {/* Custom Instruction Box for AI */}
           <div className="pt-2 border-t border-slate-800">
             <label className="text-xs font-semibold text-slate-300 block mb-1.5">
               Demander un ajustement spécifique :
@@ -310,7 +301,6 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({ defect, on
 
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/50 flex justify-end">
           <button
             onClick={onClose}

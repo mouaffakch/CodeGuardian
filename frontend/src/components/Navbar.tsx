@@ -29,7 +29,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
         <div className="flex items-center justify-between h-20">
           
-          {/* Logo & Brand - Clean & Professional without AI tags */}
           <div className="flex items-center space-x-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-cyan-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-white/15">
               <Shield className="w-5 h-5 text-[#050811] stroke-[2.5]" />
@@ -44,7 +43,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* Navigation Tabs - Spacious and elegant */}
           <nav className="hidden lg:flex items-center space-x-1.5 p-1.5 bg-white/[0.03] rounded-2xl border border-white/[0.06] backdrop-blur-xl">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -66,7 +64,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Action CTAs - Well spaced & uncluttered */}
           <div className="flex items-center space-x-3.5">
             <button
               onClick={onOpenCiCdModal}
@@ -87,7 +84,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         </div>
 
-        {/* Mobile Navigation Row */}
         <div className="lg:hidden flex items-center justify-between pb-3 pt-1 border-t border-white/[0.05] overflow-x-auto space-x-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;

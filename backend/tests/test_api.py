@@ -31,7 +31,6 @@ def test_scan_sample_project():
     assert len(data["defects"]) > 0
     assert len(data["hotspots"]) > 0
 
-    # Test detail fetch
     run_id = data["id"]
     detail_res = client.get(f"/api/scans/{run_id}")
     assert detail_res.status_code == 200

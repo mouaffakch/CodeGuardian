@@ -15,7 +15,6 @@ class Settings(BaseModel):
     debug: bool = os.getenv("DEBUG", "false").lower() in ("true", "1", "yes")
     db_url: str = DATABASE_URL
     
-    # Static Analysis Thresholds
     max_cyclomatic_complexity: int = 10
     max_function_lines: int = 40
     max_file_lines: int = 500
@@ -23,8 +22,7 @@ class Settings(BaseModel):
     max_nesting_depth: int = 4
     min_duplication_lines: int = 6
     
-    # AI configuration
-    ai_provider: str = os.getenv("AI_PROVIDER", "auto") # auto, gemini, openai, ollama, mock
+    ai_provider: str = os.getenv("AI_PROVIDER", "auto")
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
     ollama_base_url: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")

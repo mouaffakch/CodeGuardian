@@ -13,7 +13,6 @@ class ComplexityCalculator:
         comment_lines = sum(1 for line in lines if line.strip().startswith(("#", "//", "/*", "*")))
         code_lines = max(1, loc - blank_lines - comment_lines)
 
-        # Default fallback metrics
         cyclomatic = 1
         cognitive = 0
         max_nesting = 0
@@ -29,18 +28,14 @@ class ComplexityCalculator:
         else:
             cyclomatic = ComplexityCalculator._estimate_complexity_heuristics(code)
 
-        # Halstead Estimation
         tokens = [t for t in code.replace("\n", " ").split(" ") if t.strip()]
         total_tokens = len(tokens)
         unique_tokens = len(set(tokens))
         
-        # Avoid math domain error with log
         vocabulary = max(2, unique_tokens)
         length = max(2, total_tokens)
         volume = length * math.log2(vocabulary)
         
-        # Maintainability Index (MI) normalized to 0-100
-        # Standard SEI formula: 171 - 5.2 * ln(V) - 0.23 * (CC) - 16.2 * ln(LOC)
         try:
             raw_mi = 171.0 - 5.2 * math.log(max(1.0, volume)) - 0.23 * cyclomatic - 16.2 * math.log(max(1.0, float(code_lines)))
             normalized_mi = max(0.0, min(100.0, (raw_mi * 100.0) / 171.0))
@@ -126,7 +121,6 @@ class ComplexityCalculator:
                 self.generic_visit(node)
 
             def visit_BoolOp(self, node):
-                # node.values has elements, each additional element adds 1 to CC
                 self.cc += max(0, len(node.values) - 1)
                 self.cog += max(0, len(node.values) - 1)
                 self.generic_visit(node)

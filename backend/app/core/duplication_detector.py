@@ -14,7 +14,6 @@ class DuplicationDetector:
         Takes a mapping of file_path -> file_content.
         Returns detected duplicate blocks, total duplicate lines, and duplication percentage.
         """
-        # 1. Normalize lines and record mapping to original line numbers
         processed_files: Dict[str, List[Tuple[int, str]]] = {}
         total_code_lines = 0
 
@@ -24,7 +23,6 @@ class DuplicationDetector:
             normalized = []
             for idx, line in enumerate(lines, 1):
                 clean = line.strip()
-                # Skip comments and blank lines for duplication comparison
                 if not clean or clean.startswith(("#", "//", "/*", "*")):
                     continue
                 normalized.append((idx, clean))
@@ -33,7 +31,6 @@ class DuplicationDetector:
         if not processed_files:
             return {"blocks": [], "total_duplicate_lines": 0, "duplication_percentage": 0.0}
 
-        # 2. Window hashing
         window_size = self.min_lines
         block_occurrences = defaultdict(list)
 
@@ -49,16 +46,13 @@ class DuplicationDetector:
                 end_line = window[-1][0]
                 block_occurrences[block_hash].append((file_path, start_line, end_line, i, text_block))
 
-        # 3. Filter blocks occurring more than once
         raw_clones = []
         for b_hash, occurrences in block_occurrences.items():
             if len(occurrences) > 1:
-                # Compare each pair
                 for i in range(len(occurrences)):
                     for j in range(i + 1, len(occurrences)):
                         occ_a = occurrences[i]
                         occ_b = occurrences[j]
-                        # Disregard overlapping windows in the exact same file
                         if occ_a[0] == occ_b[0] and abs(occ_a[1] - occ_b[1]) < window_size:
                             continue
                         raw_clones.append({
@@ -73,10 +67,8 @@ class DuplicationDetector:
                             "snippet": occ_a[4]
                         })
 
-        # 4. Consolidate overlapping / adjacent clone blocks
         merged_clones = self._merge_clones(raw_clones)
         
-        # 5. Calculate metrics
         duplicated_lines_set = set()
         for clone in merged_clones:
             for line in range(clone["start_line_a"], clone["end_line_a"] + 1):
@@ -98,7 +90,6 @@ class DuplicationDetector:
         if not clones:
             return []
 
-        # Sort clones by file_a, file_b, start_line_a
         sorted_clones = sorted(
             clones,
             key=lambda c: (c["file_a"], c["file_b"], c["start_line_a"], c["start_line_b"])
@@ -113,7 +104,6 @@ class DuplicationDetector:
                         next_c["start_line_b"] <= current["end_line_b"] + 2)
 
             if same_pair and overlaps:
-                # Extend current
                 current["end_line_a"] = max(current["end_line_a"], next_c["end_line_a"])
                 current["end_line_b"] = max(current["end_line_b"], next_c["end_line_b"])
                 current["line_count"] = current["end_line_a"] - current["start_line_a"] + 1

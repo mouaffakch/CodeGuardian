@@ -4,7 +4,6 @@ from pathlib import Path
 from multiprocessing import freeze_support
 import uvicorn
 
-# Ensure the backend directory is in sys.path
 backend_dir = Path(__file__).resolve().parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))

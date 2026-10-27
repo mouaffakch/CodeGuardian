@@ -25,7 +25,6 @@ class AIEngine:
         """
         Generates an AI explanation, root cause analysis, fixed code snippet, and diff.
         """
-        # Try external LLM if configured and key is present
         if settings.gemini_api_key and self.provider in ("auto", "gemini"):
             try:
                 res = self._call_gemini(rule_id, title, description, code_snippet, file_path, user_instructions)
@@ -42,7 +41,6 @@ class AIEngine:
             except Exception:
                 pass
 
-        # Intelligent Built-in Semantic AI Fallback Engine
         return self._generate_expert_fallback(rule_id, title, description, code_snippet, file_path)
 
     def _call_gemini(self, rule_id: str, title: str, description: str, snippet: str, path: str, instructions: Optional[str]) -> Optional[Dict[str, Any]]:
@@ -110,11 +108,9 @@ Return ONLY raw JSON without markdown code fences.
         best_practices = []
 
         if "SEC001" in rule_id:
-            # Hardcoded Secret
             explanation = "Des clés d'API, mots de passe ou tokens d'authentification sont écrits en clair dans le code source. Toute personne ayant accès au dépôt Git peut compromettre l'infrastructure."
             root_cause = "Absence de séparation entre la configuration d'environnement et le code applicatif."
             remediation_summary = "Migration du secret vers une variable d'environnement chargée via os.getenv ou un gestionnaire de coffre-fort (Vault/AWS Secrets Manager)."
-            # Replace secret with os.getenv
             fixed_code = re.sub(
                 r'(=|:)\s*[\'"][^\'"]+[\'"]',
                 r'= os.getenv("API_SECRET_KEY", "")',
@@ -129,7 +125,6 @@ Return ONLY raw JSON without markdown code fences.
             ]
 
         elif "SEC002" in rule_id:
-            # SQL Injection
             explanation = "La requête SQL concatène ou formate directement des entrées utilisateur dans la chaîne SQL, permettant l'injection de commandes malveillantes arbitraires (SQLi)."
             root_cause = "Utilisation de l'interpolation de chaînes (f-strings ou %s) au lieu de requêtes paramétrées."
             remediation_summary = "Remplacement de l'interpolation par des placeholders paramétrés supportés par le driver de base de données."
@@ -146,7 +141,6 @@ Return ONLY raw JSON without markdown code fences.
             ]
 
         elif "BUG002" in rule_id:
-            # Mutable Default Argument
             explanation = "L'utilisation d'une valeur par défaut mutable (liste, dictionnaire) fait que l'objet est partagé entre tous les appels successifs de la fonction, créant un effet de bord persistant."
             root_cause = "Les arguments par défaut en Python sont instanciés une seule fois au moment de la compilation de la fonction et non à chaque appel."
             remediation_summary = "Initialiser l'argument à 'None' par défaut et instancier une nouvelle liste à l'intérieur du corps de la fonction."
@@ -161,7 +155,6 @@ Return ONLY raw JSON without markdown code fences.
             ]
 
         elif "BUG001" in rule_id:
-            # Bare Except
             explanation = "Une clause 'except:' vide intercepte toutes les exceptions, y compris KeyboardInterrupt et SystemExit, masquant les erreurs critiques et bloquant le débogage."
             root_cause = "Clause d'exception non qualifiée sans spécification de type."
             remediation_summary = "Remplacement par 'except Exception as e:' et enregistrement de l'erreur dans un logger."
@@ -172,7 +165,6 @@ Return ONLY raw JSON without markdown code fences.
             ]
 
         elif "COMPLEXITY" in rule_id or "SMELL" in rule_id:
-            # High Complexity or God Method
             explanation = "Cette fonction possède une complexité cyclomatique ou cognitive excessive avec trop de branches imbriquées. Cela nuit à la lisibilité et rend la fonction difficile à tester unitairement."
             root_cause = "Accumulation de responsabilités multiples dans un seul bloc monolithique."
             remediation_summary = "Refactorisation en sous-méthodes spécialisées (Extract Method pattern) et utilisation de tables de dispatch ou 'Early Return'."
@@ -184,7 +176,6 @@ Return ONLY raw JSON without markdown code fences.
             ]
 
         elif "JS-BUG001" in rule_id:
-            # Loose equality
             explanation = "L'opérateur d'égalité souple '==' force une conversion de type implicite non déterministe (type coercion), source fréquente de bugs sournois."
             root_cause = "Utilisation de '==' au lieu de l'égalité stricte '==='."
             remediation_summary = "Remplacement par l'opérateur d'égalité stricte '==='."

@@ -12,7 +12,6 @@ app = FastAPI(
     description="CodeGuardian — Détection intelligente des bugs, analyse statique, prédiction de risques et suggestions IA"
 )
 
-# Enable CORS for local Vite development & frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -39,7 +38,6 @@ app.include_router(ai.router)
 app.include_router(git_insights.router)
 app.include_router(reports.router)
 
-# Mount frontend production build if available
 frontend_dist = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 if frontend_dist.exists():
     app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")

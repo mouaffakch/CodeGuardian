@@ -12,13 +12,12 @@ def bad_func(val=[]):
     except:
         pass
 """
-    # Write to a temp string analysis
     res = static_analyzer._analyze_python(sample_code, "test.py", {"functions": []})
     rule_ids = [d["rule_id"] for d in res]
     
-    assert "BUG002" in rule_ids # mutable default arg
-    assert "BUG004" in rule_ids # == None
-    assert "BUG001" in rule_ids # bare except
+    assert "BUG002" in rule_ids
+    assert "BUG004" in rule_ids
+    assert "BUG001" in rule_ids
 
 def test_sql_injection_detection():
     sample_code = """

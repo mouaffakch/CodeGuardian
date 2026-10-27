@@ -9,11 +9,9 @@ if __name__ == "__main__":
     root_dir = Path(__file__).resolve().parent
     backend_dir = root_dir / "backend"
 
-    # Add backend directory to sys.path
     if str(backend_dir) not in sys.path:
         sys.path.insert(0, str(backend_dir))
 
-    # Detect virtualenv python if run from global python
     venv_python = backend_dir / ".venv" / "Scripts" / "python.exe"
     if not venv_python.exists():
         venv_python = backend_dir / ".venv" / "bin" / "python"

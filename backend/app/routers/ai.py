@@ -71,7 +71,6 @@ def apply_fix_to_file(req: ApplyFixRequest, db: Session = Depends(get_db)):
     if not fixed_code:
         raise HTTPException(status_code=400, detail="No suggested fix available for this defect")
 
-    # Locate project root
     run = db.query(AnalysisRun).filter(AnalysisRun.id == defect.run_id).first()
     project = db.query(Project).filter(Project.id == run.project_id).first() if run else None
     base_dir = Path(project.root_path) if project and project.root_path else WORKSPACE_ROOT
@@ -81,7 +80,6 @@ def apply_fix_to_file(req: ApplyFixRequest, db: Session = Depends(get_db)):
         target_file = (base_dir / target_file).resolve()
 
     if not target_file.is_file():
-        # Try checking relative to WORKSPACE_ROOT
         alt_file = (WORKSPACE_ROOT / defect.file_path).resolve()
         if alt_file.is_file():
             target_file = alt_file
@@ -89,31 +87,25 @@ def apply_fix_to_file(req: ApplyFixRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail=f"File not found on disk: {target_file}")
 
     try:
-        # 1. Create a backup file
         backup_path = target_file.with_suffix(target_file.suffix + ".bak")
         shutil.copyfile(target_file, backup_path)
 
-        # 2. Read existing content
         with open(target_file, "r", encoding="utf-8", errors="replace") as f:
             content = f.read()
 
-        # 3. Apply substitution
         original_snippet = defect.code_snippet
         if original_snippet and original_snippet.strip() in content:
             new_content = content.replace(original_snippet.strip(), fixed_code.strip(), 1)
         else:
-            # Fallback by line number
             lines = content.splitlines()
             start = max(0, defect.line_number - 1)
             end = defect.end_line or (start + 1)
             lines[start:end] = fixed_code.splitlines()
             new_content = "\n".join(lines)
 
-        # 4. Save modified file
         with open(target_file, "w", encoding="utf-8") as f:
             f.write(new_content)
 
-        # 5. Update defect status in DB
         defect.status = "RESOLVED"
         defect.ai_suggested_fix = fixed_code
         db.commit()

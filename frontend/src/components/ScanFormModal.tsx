@@ -36,7 +36,6 @@ export const ScanFormModal: React.FC<ScanFormModalProps> = ({ isOpen, onClose, o
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
       <div className="bg-[#0f172a] border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
         
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
           <div className="flex items-center space-x-2 text-white font-bold">
             <Play className="w-4 h-4 text-cyan-400 fill-current" />
@@ -50,7 +49,6 @@ export const ScanFormModal: React.FC<ScanFormModalProps> = ({ isOpen, onClose, o
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           
           <div>
@@ -86,7 +84,6 @@ export const ScanFormModal: React.FC<ScanFormModalProps> = ({ isOpen, onClose, o
             </p>
           </div>
 
-          {/* Quick Preset Buttons */}
           <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-2">
             <span className="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">
               Scénarios Prédéfinis Rapides :
@@ -114,7 +111,6 @@ export const ScanFormModal: React.FC<ScanFormModalProps> = ({ isOpen, onClose, o
             <span>L'analyse statique AST, le calcul des risques Git et les suggestions IA seront exécutés.</span>
           </div>
 
-          {/* Submit */}
           <div className="pt-2 flex justify-end space-x-2">
             <button
               type="button"

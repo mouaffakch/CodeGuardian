@@ -38,7 +38,6 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
     """Triggers static analysis, duplication scanning, Git history churn, and AI bug prediction."""
     start_time = time.time()
     
-    # 1. Resolve Target Path
     target_dir = Path(req.target_path) if req.target_path else WORKSPACE_ROOT
     if not target_dir.is_absolute():
         target_dir = (WORKSPACE_ROOT / target_dir).resolve()
@@ -46,7 +45,6 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
     if not target_dir.exists():
         raise HTTPException(status_code=400, detail=f"Target path does not exist: {target_dir}")
 
-    # 2. Get or create project
     project_name = req.project_name or target_dir.name
     project = db.query(Project).filter(Project.root_path == str(target_dir)).first()
     if not project:
@@ -55,16 +53,13 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(project)
 
-    # 3. Gather Git Metadata & Churn
     repo_info = git_analyzer.get_repo_info(str(target_dir))
     branch = repo_info.get("branch", "main")
     commit_hash = repo_info.get("commit_hash", "HEAD")
     churn_data = git_analyzer.analyze_file_churn(str(target_dir))
 
-    # Incremental PR Diff Filter
     changed_files = set(git_analyzer.get_changed_files(str(target_dir))) if req.diff_only else None
 
-    # 4. Traverse Files
     file_contents: Dict[str, str] = {}
     file_metrics: Dict[str, Dict[str, Any]] = {}
     file_defects: Dict[str, List[Dict[str, Any]]] = {}
@@ -72,7 +67,6 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
     all_defects: List[Dict[str, Any]] = []
 
     for root, dirs, files in os.walk(target_dir):
-        # Prune excluded directories
         dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS and not d.startswith(".")]
 
         for file in files:
@@ -85,7 +79,6 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
             if changed_files is not None and rel_check not in changed_files:
                 continue
 
-            # Skip massive files > 2MB
             try:
                 if os.path.getsize(full_path) > 2 * 1024 * 1024:
                     continue
@@ -99,23 +92,19 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
             file_metrics[rel_p] = res["metrics"]
             total_loc += res["metrics"].get("loc", 0)
 
-            # Store file content for duplication analysis
             try:
                 with open(full_path, "r", encoding="utf-8", errors="replace") as f:
                     file_contents[rel_p] = f.read()
             except Exception:
                 pass
 
-    # 4.b Software Composition Analysis (SCA) - Dependency Vulnerabilities
     sca_findings = sca_scanner.scan_directory(str(target_dir))
     all_defects.extend(sca_findings)
 
-    # 5. Duplication Detection
     dup_result = duplication_detector.find_duplications(file_contents)
     duplication_blocks = dup_result["blocks"]
     duplication_percentage = dup_result["duplication_percentage"]
 
-    # Add duplication issues as defects
     for dup in duplication_blocks:
         all_defects.append({
             "file_path": dup["file_a"],
@@ -129,10 +118,8 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
             "code_snippet": dup["snippet"]
         })
 
-    # 6. Bug Susceptibility & Hotspot Risk Prediction
     hotspots_result = bug_predictor.predict_hotspots(file_metrics, churn_data, file_defects)
 
-    # 7. AI Explanations & Fix Generation for Critical/High defects
     critical_count = sum(1 for d in all_defects if d["severity"] == "CRITICAL")
     high_count = sum(1 for d in all_defects if d["severity"] == "HIGH")
     medium_count = sum(1 for d in all_defects if d["severity"] == "MEDIUM")
@@ -140,7 +127,6 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
 
     if req.include_ai_fixes:
         for defect in all_defects:
-            # Generate AI fixes for critical and high issues automatically, or first 10 issues
             if defect["severity"] in ("CRITICAL", "HIGH") or len(all_defects) <= 15:
                 snippet = defect.get("code_snippet") or ""
                 if snippet:
@@ -155,15 +141,12 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
                     defect["ai_suggested_fix"] = ai_res.get("fixed_code")
                     defect["ai_diff"] = ai_res.get("diff")
 
-    # 8. Compute Overall Health Score (0 to 100)
-    # Deductions: critical = -15, high = -8, medium = -3, low = -1, duplication penalty
     deductions = (critical_count * 15.0) + (high_count * 8.0) + (medium_count * 3.0) + (low_count * 1.0)
     deductions += (duplication_percentage * 1.2)
     health_score = max(5.0, min(100.0, 100.0 - deductions))
 
     duration_ms = int((time.time() - start_time) * 1000)
 
-    # 9. Persist to Database
     run = AnalysisRun(
         project_id=project.id,
         branch=branch,
@@ -184,7 +167,6 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(run)
 
-    # Save Defects
     defect_records = []
     for d in all_defects:
         defect_obj = Defect(
@@ -205,7 +187,6 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
         defect_records.append(defect_obj)
     db.add_all(defect_records)
 
-    # Save Hotspots
     hotspot_records = []
     for h in hotspots_result:
         hotspot_obj = HotspotRisk(
@@ -223,7 +204,6 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
         hotspot_records.append(hotspot_obj)
     db.add_all(hotspot_records)
 
-    # Save Duplications
     dup_records = []
     for b in duplication_blocks:
         dup_obj = DuplicationBlock(
@@ -314,7 +294,6 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     latest_run = recent_runs[0] if recent_runs else None
     latest_health_score = latest_run.health_score if latest_run else 100.0
 
-    # Aggregate defect counts from the latest run
     category_counts = {"BUG": 0, "SECURITY": 0, "BAD_PRACTICE": 0, "COMPLEXITY": 0, "DUPLICATION": 0}
     severity_counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
     high_risk_files = 0

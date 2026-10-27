@@ -58,10 +58,8 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
   return (
     <div className="space-y-6">
       
-      {/* Search & Filters */}
       <div className="glass-panel rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-center transition-all duration-300">
         
-        {/* Search */}
         <div className="relative w-full md:w-96">
           <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-2.5" />
           <input
@@ -73,9 +71,7 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
           />
         </div>
 
-        {/* Filters */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          {/* Severity selector */}
           <select
             value={selectedSeverity}
             onChange={(e) => setSelectedSeverity(e.target.value)}
@@ -88,7 +84,6 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
             <option value="LOW">Basse</option>
           </select>
 
-          {/* Category selector */}
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -109,7 +104,6 @@ export const DefectExplorerPage: React.FC<DefectExplorerPageProps> = ({ defects,
 
       </div>
 
-      {/* Defects List */}
       <div className="space-y-3">
         {filteredDefects.map((defect) => (
           <div

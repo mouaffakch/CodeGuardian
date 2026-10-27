@@ -15,7 +15,6 @@ class BugPredictor:
             churn = churn_data.get(rel_path, {})
             defects = files_defects.get(rel_path, [])
 
-            # Extract metrics
             cc = metrics.get("cyclomatic_complexity", 1)
             cog = metrics.get("cognitive_complexity", 0)
             mi = metrics.get("maintainability_index", 100.0)
@@ -28,31 +27,22 @@ class BugPredictor:
 
             critical_defect_count = sum(1 for d in defects if d.get("severity") in ("CRITICAL", "HIGH"))
 
-            # Calculate individual factor scores (0.0 to 100.0)
-            # 1. Complexity factor (CC & Cognitive)
             cc_factor = min(100.0, (cc / 20.0) * 100.0)
             cog_factor = min(100.0, (cog / 25.0) * 100.0)
             complexity_score = (cc_factor * 0.6) + (cog_factor * 0.4)
 
-            # 2. Churn factor
-            # Files modified frequently (>10 times) or high churn lines (>300) get high churn score
             churn_score = 0.0
             if commit_count > 0:
                 commit_score = min(100.0, (commit_count / 15.0) * 100.0)
                 lines_score = min(100.0, (churn_lines / 400.0) * 100.0)
                 churn_score = (commit_score * 0.5) + (lines_score * 0.5)
 
-            # 3. Bug recurrence factor (past bug fixes in Git history)
             bug_recurrence_score = min(100.0, (bug_fix_count / 4.0) * 100.0)
 
-            # 4. Maintainability deficit (lower MI = higher risk)
             mi_deficit = max(0.0, 100.0 - mi)
 
-            # 5. Static Defect Density factor
             defect_density_score = min(100.0, (critical_defect_count * 25.0) + (defect_count * 10.0))
 
-            # Composite Risk Score Calculation:
-            # Weighted average
             if commit_count > 0:
                 raw_score = (
                     complexity_score * 0.25 +
@@ -62,7 +52,6 @@ class BugPredictor:
                     defect_density_score * 0.15
                 )
             else:
-                # If no git history, rely on static complexity, MI and defect density
                 raw_score = (
                     complexity_score * 0.45 +
                     mi_deficit * 0.25 +
@@ -71,7 +60,6 @@ class BugPredictor:
 
             final_risk_score = round(max(0.0, min(100.0, raw_score)), 1)
 
-            # Determine Risk Level
             if final_risk_score >= 70:
                 risk_level = "CRITICAL"
             elif final_risk_score >= 45:
@@ -81,7 +69,6 @@ class BugPredictor:
             else:
                 risk_level = "LOW"
 
-            # Determine explanation reasons
             reasons = []
             if cc > 10:
                 reasons.append(f"High cyclomatic complexity (CC: {cc})")
@@ -110,7 +97,6 @@ class BugPredictor:
                 "reasons": reasons
             })
 
-        # Sort descending by risk score
         hotspots.sort(key=lambda x: x["risk_score"], reverse=True)
         return hotspots
 

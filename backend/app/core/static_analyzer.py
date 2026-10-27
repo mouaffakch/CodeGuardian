@@ -68,10 +68,8 @@ class StaticAnalyzer:
         defects = []
         ext = path.suffix.lower()
 
-        # Complexity Metrics
         metrics = ComplexityCalculator.calculate_metrics(content, file_path)
 
-        # Python-specific AST Analysis
         if ext == ".py":
             defects.extend(self._analyze_python(content, rel_path, metrics))
         elif ext in (".js", ".jsx", ".ts", ".tsx"):
@@ -79,7 +77,6 @@ class StaticAnalyzer:
         else:
             defects.extend(self._analyze_generic(content, rel_path))
 
-        # Check structural file-level smells
         if metrics.get("loc", 0) > settings.max_file_lines:
             defects.append({
                 "file_path": rel_path,
@@ -114,7 +111,6 @@ class StaticAnalyzer:
         defects = []
         lines = code.splitlines()
 
-        # 1. AST Visitor
         try:
             tree = ast.parse(code)
             ast_defects = self._run_python_ast_checks(tree, lines, rel_path)
@@ -132,12 +128,10 @@ class StaticAnalyzer:
                 "code_snippet": lines[e.lineno - 1] if e.lineno and e.lineno <= len(lines) else ""
             })
 
-        # 2. Regex-based Security & Pattern Checks
         defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.SECRET_PATTERNS))
         defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.SQL_PATTERNS))
         defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.UNSAFE_CALLS))
 
-        # 3. Function-level complexity smells
         for func in metrics.get("functions", []):
             if func["cyclomatic"] > settings.max_cyclomatic_complexity:
                 snippet = "\n".join(lines[func["line"] - 1 : min(func["line"] + 5, len(lines))])
@@ -173,7 +167,6 @@ class StaticAnalyzer:
 
         class ASTChecker(ast.NodeVisitor):
             def visit_FunctionDef(self, node):
-                # Check mutable default argument (e.g. def foo(arg=[]))
                 for arg in node.args.defaults:
                     if isinstance(arg, (ast.List, ast.Dict, ast.Set)):
                         line = arg.lineno
@@ -190,7 +183,6 @@ class StaticAnalyzer:
                             "code_snippet": snippet
                         })
 
-                # Check excessive parameters
                 total_args = len(node.args.args)
                 if total_args > 5:
                     line = node.lineno
@@ -213,7 +205,6 @@ class StaticAnalyzer:
                 self.visit_FunctionDef(node)
 
             def visit_ExceptHandler(self, node):
-                # Bare except: except: or except BaseException:
                 if node.type is None:
                     line = node.lineno
                     snippet = lines[line - 1] if line <= len(lines) else ""
@@ -245,7 +236,6 @@ class StaticAnalyzer:
                 self.generic_visit(node)
 
             def visit_Compare(self, node):
-                # Check for comparison using == None or != None
                 for comparator in node.comparators:
                     if isinstance(comparator, ast.Constant) and comparator.value is None:
                         line = node.lineno
@@ -272,7 +262,6 @@ class StaticAnalyzer:
         lines = code.splitlines()
         defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.JS_PATTERNS))
 
-        # Check for deep nesting heuristics (e.g. > 4 tabs/indentation levels)
         for i, line in enumerate(lines, 1):
             indent_spaces = len(line) - len(line.lstrip(" "))
             indent_tabs = len(line) - len(line.lstrip("\t"))
@@ -300,11 +289,9 @@ class StaticAnalyzer:
         for pattern_str, rule_id, title, severity, category in patterns:
             try:
                 for match in re.finditer(pattern_str, code):
-                    # compute line number from match.start()
                     line_no = code[:match.start()].count("\n") + 1
                     snippet = lines[line_no - 1] if line_no <= len(lines) else match.group(0)
                     
-                    # Mask secret in snippet for security if rule is secret
                     display_snippet = snippet
                     if "SEC001" in rule_id or "secret" in title.lower():
                         display_snippet = re.sub(r'(=|:)\s*[\'"][^\'"]+[\'"]', r'\1 "********"', snippet)

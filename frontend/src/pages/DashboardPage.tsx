@@ -44,7 +44,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   return (
     <div className="space-y-8">
-      {/* Metrics Row */}
       <MetricCards
         healthScore={latestRun.health_score}
         totalIssues={latestRun.total_issues}
@@ -56,10 +55,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         totalFiles={latestRun.total_files}
       />
 
-      {/* Main Grid: Critical Issues & Risk Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Column: Top Priority Defects */}
         <div className="lg:col-span-2 glass-panel rounded-2xl p-6 transition-all duration-300">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -120,10 +117,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Predictive Hotspots & Breakdown */}
         <div className="space-y-6">
           
-          {/* Top Predictive Hotspots Card */}
           <div className="glass-panel rounded-2xl p-6 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
@@ -166,7 +161,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </div>
           </div>
 
-          {/* Issue Categories Breakdown */}
           <div className="glass-panel rounded-2xl p-6 transition-all duration-300">
             <h3 className="text-sm font-bold text-white mb-3">Répartition par Catégorie</h3>
             <div className="space-y-2">

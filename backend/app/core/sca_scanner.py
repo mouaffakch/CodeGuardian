@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-# Known advisory offline database for fast, zero-downtime dependency vulnerability scanning
 OFFLINE_ADVISORIES = [
     {
         "ecosystem": "PyPI",
@@ -95,12 +94,10 @@ class SCAScanner:
         findings = []
         path = Path(target_dir)
 
-        # 1. Scan requirements.txt / Pipfile
         req_file = path / "requirements.txt"
         if req_file.is_file():
             findings.extend(self._scan_requirements_txt(req_file, target_dir))
 
-        # 2. Scan package.json
         pkg_file = path / "package.json"
         if pkg_file.is_file():
             findings.extend(self._scan_package_json(pkg_file, target_dir))
@@ -122,7 +119,6 @@ class SCAScanner:
             if not line or line.startswith("#"):
                 continue
 
-            # Parse package and version constraint (e.g. requests==2.28.0 or flask>=2.0,<2.2.0)
             match = re.match(r"^([a-zA-Z0-9_\-\.]+)\s*([=><!~]+.*)?$", line)
             if not match:
                 continue
@@ -130,10 +126,8 @@ class SCAScanner:
             pkg_name = match.group(1).lower()
             version_spec = (match.group(2) or "").strip()
 
-            # Match against advisories
             for adv in OFFLINE_ADVISORIES:
                 if adv["ecosystem"] == "PyPI" and adv["package"].lower() == pkg_name:
-                    # Simple heuristic version match or version equality
                     if self._is_version_vulnerable(version_spec, adv["vulnerable_versions"]):
                         findings.append({
                             "file_path": rel_path,
@@ -188,9 +182,8 @@ class SCAScanner:
 
     def _is_version_vulnerable(self, version_spec: str, vulnerable_ranges: List[str]) -> bool:
         if not version_spec:
-            return True # Unpinned dependency is always considered risky
+            return True
 
-        # Extract numeric version
         version_num = re.findall(r"\d+\.\d+(?:\.\d+)?", version_spec)
         if not version_num:
             return True
@@ -201,7 +194,6 @@ class SCAScanner:
             threshold_match = re.search(r"<\s*(\d+\.\d+(?:\.\d+)?)", v_range)
             if threshold_match:
                 t_parts = [int(p) for p in threshold_match.group(1).split(".")]
-                # Compare version tuples
                 if v_parts < t_parts:
                     return True
 

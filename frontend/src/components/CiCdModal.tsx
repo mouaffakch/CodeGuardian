@@ -93,7 +93,6 @@ repos:
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
       <div className="bg-[#0f172a] border border-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden">
         
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
           <div className="flex items-center space-x-2 text-white font-bold">
             <Terminal className="w-5 h-5 text-cyan-400" />
@@ -107,7 +106,6 @@ repos:
           </button>
         </div>
 
-        {/* Tab Selector */}
         <div className="flex border-b border-slate-800 bg-slate-900/30 px-6 pt-3 space-x-6 text-xs font-semibold">
           {[
             { id: 'cli', label: 'CLI & Terminal' },
@@ -129,7 +127,6 @@ repos:
           ))}
         </div>
 
-        {/* Content */}
         <div className="p-6">
           {activeTab === 'cli' && (
             <div>
@@ -211,7 +208,6 @@ repos:
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/50 flex justify-end">
           <button
             onClick={onClose}

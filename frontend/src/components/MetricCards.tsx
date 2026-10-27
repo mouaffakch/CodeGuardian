@@ -33,7 +33,6 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       
-      {/* Health Score Card */}
       <div className="glass-panel rounded-2xl p-5 relative overflow-hidden transition-all duration-300 group">
         <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl -z-10 group-hover:bg-emerald-500/20 transition" />
         <div className="flex items-center justify-between">
@@ -58,7 +57,6 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
         </div>
       </div>
 
-      {/* Critical & High Defects */}
       <div className="glass-panel rounded-2xl p-5 relative overflow-hidden transition-all duration-300 group">
         <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl -z-10 group-hover:bg-rose-500/20 transition" />
         <div className="flex items-center justify-between">
@@ -76,7 +74,6 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
         </p>
       </div>
 
-      {/* Hotspot & Predictive Risk */}
       <div className="glass-panel rounded-2xl p-5 relative overflow-hidden transition-all duration-300 group">
         <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl -z-10 group-hover:bg-orange-500/20 transition" />
         <div className="flex items-center justify-between">
@@ -92,7 +89,6 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
         </p>
       </div>
 
-      {/* Duplication & Codebase Volume */}
       <div className="glass-panel rounded-2xl p-5 relative overflow-hidden transition-all duration-300 group">
         <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl -z-10 group-hover:bg-cyan-500/20 transition" />
         <div className="flex items-center justify-between">

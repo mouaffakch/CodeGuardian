@@ -11,7 +11,6 @@ def setup_db():
     init_db()
 
 def test_apply_fix_endpoint(tmp_path):
-    # Create sample file with defect
     code_file = tmp_path / "target_code.py"
     code_file.write_text("def authenticate(user, roles=[]):\n    pass\n", encoding="utf-8")
 
@@ -41,7 +40,6 @@ def test_apply_fix_endpoint(tmp_path):
     defect_id = defect.id
     db.close()
 
-    # Call /api/ai/apply-fix
     response = client.post("/api/ai/apply-fix", json={
         "defect_id": defect_id
     })
@@ -51,11 +49,9 @@ def test_apply_fix_endpoint(tmp_path):
     assert data["success"] is True
     assert "target_code.py" in data["file_path"]
 
-    # Check backup file exists
     backup_file = tmp_path / "target_code.py.bak"
     assert backup_file.exists()
 
-    # Check file was modified
     new_content = code_file.read_text(encoding="utf-8")
     assert "roles=None" in new_content
 

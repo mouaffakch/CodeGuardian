@@ -14,7 +14,6 @@ export const AnimatedBackground: React.FC = () => {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    // Particle nodes configuration
     const PARTICLE_COUNT = Math.min(65, Math.floor((width * height) / 22000));
     const MAX_DISTANCE = 140;
 
@@ -29,10 +28,10 @@ export const AnimatedBackground: React.FC = () => {
     }
 
     const colors = [
-      'rgba(6, 182, 212,',   // Cyan
-      'rgba(16, 185, 129,',  // Emerald
-      'rgba(99, 102, 241,',  // Indigo
-      'rgba(148, 163, 184,', // Slate
+      'rgba(6, 182, 212,',
+      'rgba(16, 185, 129,',
+      'rgba(99, 102, 241,',
+      'rgba(148, 163, 184,',
     ];
 
     const particles: Particle[] = [];
@@ -48,7 +47,6 @@ export const AnimatedBackground: React.FC = () => {
       });
     }
 
-    // Mouse interaction
     let mouse = { x: -1000, y: -1000, radius: 160 };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -71,13 +69,11 @@ export const AnimatedBackground: React.FC = () => {
     window.addEventListener('mouseleave', handleMouseLeave);
     window.addEventListener('resize', handleResize);
 
-    // Animated Aurora Light Wave parameters
     let time = 0;
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Subtle Deep Obsidian Background
       const bgGrad = ctx.createLinearGradient(0, 0, width, height);
       bgGrad.addColorStop(0, '#040711');
       bgGrad.addColorStop(0.5, '#060a16');
@@ -85,7 +81,6 @@ export const AnimatedBackground: React.FC = () => {
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Animated Flowing Ambient Light Beams (Aurora effect)
       time += 0.004;
       const auroraGrad1 = ctx.createRadialGradient(
         width * 0.25 + Math.sin(time) * 120,
@@ -115,21 +110,17 @@ export const AnimatedBackground: React.FC = () => {
       ctx.fillStyle = auroraGrad2;
       ctx.fillRect(0, 0, width, height);
 
-      // 3. Update & Draw Constellation Particles & Connective Telemetry Mesh
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
-        // Move
         p.x += p.vx;
         p.y += p.vy;
 
-        // Wrap around boundaries smoothly
         if (p.x < 0) p.x = width;
         else if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
         else if (p.y > height) p.y = 0;
 
-        // Mouse distance influence
         const dxMouse = mouse.x - p.x;
         const dyMouse = mouse.y - p.y;
         const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
@@ -138,13 +129,11 @@ export const AnimatedBackground: React.FC = () => {
           alpha = Math.min(0.9, p.baseAlpha + (1 - distMouse / mouse.radius) * 0.6);
         }
 
-        // Draw particle dot
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = `${p.color} ${alpha})`;
         ctx.fill();
 
-        // Connect with neighboring particles
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx = p.x - p2.x;
@@ -178,10 +167,8 @@ export const AnimatedBackground: React.FC = () => {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* Interactive 60fps Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
-      {/* Ultra-fine Technical Micro-Grid Overlay */}
       <div 
         className="absolute inset-0 opacity-[0.25]"
         style={{
@@ -192,7 +179,6 @@ export const AnimatedBackground: React.FC = () => {
         }}
       />
 
-      {/* Top Subtle Cyber Horizon Line */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
     </div>
   );

@@ -14,7 +14,6 @@ export const DuplicationPage: React.FC<DuplicationPageProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* Intro Header */}
       <div className="bg-gradient-to-r from-purple-950/40 via-slate-900 to-indigo-950/30 border border-purple-800/40 rounded-2xl p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -36,14 +35,12 @@ export const DuplicationPage: React.FC<DuplicationPageProps> = ({
         </div>
       </div>
 
-      {/* Clones List */}
       <div className="space-y-4">
         {duplications.map((dup, idx) => (
           <div
             key={dup.id || idx}
             className="glass-panel hover:bg-slate-900/80 rounded-2xl p-5 space-y-4 transition-all duration-300"
           >
-            {/* Clones Pair Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
               <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
                 <span className="bg-slate-800 px-2.5 py-1 rounded-md text-cyan-400 border border-slate-700">
@@ -62,7 +59,6 @@ export const DuplicationPage: React.FC<DuplicationPageProps> = ({
               </div>
             </div>
 
-            {/* Snippet */}
             {dup.snippet && (
               <div>
                 <span className="text-xs font-semibold text-slate-400 block mb-1.5 uppercase tracking-wider">
@@ -74,7 +70,6 @@ export const DuplicationPage: React.FC<DuplicationPageProps> = ({
               </div>
             )}
 
-            {/* Refactoring recommendation */}
             <div className="bg-purple-950/20 border border-purple-900/40 rounded-xl p-3 flex items-start space-x-2.5 text-xs text-purple-200">
               <Lightbulb className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
               <div>

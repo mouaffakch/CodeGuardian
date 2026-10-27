@@ -27,12 +27,10 @@ export const App: React.FC = () => {
   const [currentRun, setCurrentRun] = useState<AnalysisRun | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   
-  // Modals state
   const [selectedDefect, setSelectedDefect] = useState<Defect | null>(null);
   const [isScanModalOpen, setIsScanModalOpen] = useState<boolean>(false);
   const [isCiCdModalOpen, setIsCiCdModalOpen] = useState<boolean>(false);
 
-  // Load initial data
   const loadData = async () => {
     setLoading(true);
     try {
@@ -43,7 +41,6 @@ export const App: React.FC = () => {
       setRuns(runsData);
 
       if (runsData.length > 0) {
-        // Fetch full detail of the latest run
         const latestDetail = await fetchScanDetail(runsData[0].id);
         setCurrentRun(latestDetail);
       }
@@ -78,10 +75,8 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#040711] text-slate-100 relative overflow-hidden">
       
-      {/* Interactive Telemetry Canvas Background */}
       <AnimatedBackground />
 
-      {/* Top Navbar */}
       <div className="relative z-20">
         <Navbar
           activeTab={activeTab}
@@ -92,7 +87,6 @@ export const App: React.FC = () => {
         />
       </div>
 
-      {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {loading && !currentRun ? (
           <div className="flex flex-col items-center justify-center py-28 space-y-4">
@@ -147,7 +141,6 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Footer with Glass Effect */}
       <footer className="border-t border-white/[0.07] bg-[#070b16]/70 backdrop-blur-md py-5 text-center text-xs text-slate-400 relative z-10">
         <p className="flex items-center justify-center space-x-2">
           <span className="font-semibold text-slate-200">CodeGuardian</span>
@@ -156,7 +149,6 @@ export const App: React.FC = () => {
         </p>
       </footer>
 
-      {/* Modals */}
       <DefectDetailModal
         defect={selectedDefect}
         onClose={() => setSelectedDefect(null)}

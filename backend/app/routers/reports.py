@@ -18,11 +18,11 @@ def get_status_badge(project_id: int = Query(default=None), db: Session = Depend
     status_text = f"{int(score)}/100"
     
     if score >= 80:
-        badge_color = "#10b981" # Green
+        badge_color = "#10b981"
     elif score >= 60:
-        badge_color = "#f59e0b" # Amber
+        badge_color = "#f59e0b"
     else:
-        badge_color = "#ef4444" # Red
+        badge_color = "#ef4444"
 
     svg_content = f"""<svg xmlns="http://www.w3.org/2000/svg" width="168" height="20" role="img" aria-label="CodeGuardian: {status_text}">
   <linearGradient id="s" x2="0" y2="100%">
@@ -157,7 +157,6 @@ def export_report(run_id: int, format: str = "markdown", db: Session = Depends(g
         return Response(content=html_content, media_type="text/html")
 
     else:
-        # Markdown report
         lines = [
             f"# CodeGuardian - Rapport d'Audit & Qualité Logicielle - #{run.id}",
             f"- **Branche :** `{run.branch}`",
