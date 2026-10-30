@@ -7,10 +7,8 @@ from app.config import settings
 from app.core.complexity_metrics import ComplexityCalculator
 
 class StaticAnalyzer:
-    """Multi-language static analysis engine with AST inspection and security pattern detection."""
-
     SECRET_PATTERNS = [
-        (r'(?i)(api[_-]?key|secret[_-]?key|auth[_-]?token|password|passwd|jwt[_-]?token|private[_-]?key)\s*=\s*[\'"][a-zA-Z0-9_\-\.\$\/]{8,}[\'"]', "SEC001", "Hardcoded credential or secret key detected", "CRITICAL", "SECURITY"),
+        (r'(?i)(api[_-]?key|secret[_-]?key|auth[_-]?token|password|passwd|jwt[_-]?token|private[_-]?key)\s*[:=]\s*[\'"][a-zA-Z0-9_\-\.\$\/]{8,}[\'"]', "SEC001", "Hardcoded credential or secret key detected", "CRITICAL", "SECURITY"),
         (r'(?i)ghp_[a-zA-Z0-9]{36}', "SEC001-GH", "Hardcoded GitHub Personal Access Token", "CRITICAL", "SECURITY"),
         (r'(?i)AKIA[0-9A-Z]{16}', "SEC001-AWS", "Hardcoded AWS Access Key ID", "CRITICAL", "SECURITY"),
     ]
@@ -29,16 +27,58 @@ class StaticAnalyzer:
         (r'\byaml\.load\s*\([^,)]+\)', "SEC006", "yaml.load() without SafeLoader is unsafe; use yaml.safe_load()", "HIGH", "SECURITY")
     ]
 
-    JS_PATTERNS = [
+    AI_DATA_SCIENCE_PATTERNS = [
+        (r'\b(pickle|joblib)\.load\s*\(', "AI-SEC001", "Deserializing untrusted model checkpoints (pickle/joblib) can lead to Arbitrary Code Execution; prefer safetensors or ONNX", "CRITICAL", "SECURITY"),
+        (r'\btorch\.load\s*\([^)]*weights_only\s*=\s*False[^)]*\)', "AI-SEC002", "torch.load with weights_only=False allows arbitrary code execution via pickled weights", "CRITICAL", "SECURITY"),
+        (r'([a-zA-Z0-9_]*loss[a-zA-Z0-9_]*)\s*\+=\s*([a-zA-Z0-9_]+)\b(?!\.item\(\))', "AI-BUG001", "Accumulating loss tensor directly across batches causes GPU memory leak; use loss.item()", "MEDIUM", "BUG"),
+        (r'(\.backward\s*\(\s*\)|optimizer\.step\s*\(\s*\))(?![^;]*torch\.no_grad)', "AI-PERF001", "Model inference without disabling autograd (torch.no_grad() / eval()) wastes GPU memory", "LOW", "BAD_PRACTICE"),
+        (r'random_state\s*=\s*None', "AI-REPRO001", "Machine learning split/model lacks fixed seed (random_state=None), preventing experimental reproducibility", "LOW", "BAD_PRACTICE"),
+    ]
+
+    JS_TS_ANGULAR_REACT_PATTERNS = [
         (r'(?i)(api[_-]?key|secret|password|bearer|token)\s*[:=]\s*[\'"][a-zA-Z0-9_\-\.]{8,}[\'"]', "JS-SEC001", "Hardcoded secret or credential token", "CRITICAL", "SECURITY"),
         (r'\beval\s*\(', "JS-SEC002", "Dangerous eval() usage enables XSS/arbitrary JS execution", "CRITICAL", "SECURITY"),
         (r'__proto__\s*=', "JS-SEC003", "Potential Prototype Pollution vulnerability", "HIGH", "SECURITY"),
+        (r'dangerouslySetInnerHTML\s*=\s*\{\s*\{\s*__html\s*:\s*(?!DOMPurify)', "REACT-SEC001", "dangerouslySetInnerHTML without DOMPurify sanitization allows Cross-Site Scripting (XSS)", "CRITICAL", "SECURITY"),
+        (r'\[innerHTML\]\s*=\s*[\'"][^\'"]*[\'"]', "ANGULAR-SEC001", "Bypassing Angular DOM sanitization with direct innerHTML binding can introduce XSS", "HIGH", "SECURITY"),
+        (r'bypassSecurityTrust(Html|Script|Url)\s*\(', "ANGULAR-SEC002", "Explicit bypass of Angular DomSanitizer (bypassSecurityTrust*) presents security risks", "HIGH", "SECURITY"),
         (r'[^=!]==[^=]', "JS-BUG001", "Loose equality check (==) can lead to unexpected type coercion bugs; use ===", "MEDIUM", "BUG"),
         (r'console\.(log|debug|warn)\s*\(', "JS-SMELL001", "Console logging statements left in production code", "LOW", "BAD_PRACTICE"),
+        (r'catch\s*\([^\)]*\)\s*\{\s*\}', "JS-BUG002", "Empty catch block silently swallowing exceptions", "HIGH", "BUG"),
+    ]
+
+    JAVA_SPRING_PATTERNS = [
+        (r'@CrossOrigin\s*\(\s*(origins\s*=\s*)?["\']\*["\']\s*\)', "SPRING-SEC001", "Wildcard CORS configuration (@CrossOrigin('*')) allows unauthorized cross-domain access", "HIGH", "SECURITY"),
+        (r'["\'].*?\b(SELECT|FROM|UPDATE|DELETE)\b.*?["\']\s*\+', "SPRING-SEC002", "SQL/HQL injection via string concatenation in query construction", "CRITICAL", "SECURITY"),
+        (r'@RequestMapping\s*\(\s*["\'][^"\']+["\']\s*\)(?!\s*,\s*method)', "SPRING-SMELL001", "Missing HTTP method in @RequestMapping; prefer explicit @GetMapping / @PostMapping", "LOW", "BAD_PRACTICE"),
+        (r'catch\s*\(\s*(Exception|Throwable)\s+\w+\s*\)\s*\{\s*\}', "JAVA-BUG001", "Empty catch block swallowing critical Java exceptions", "HIGH", "BUG"),
+        (r'System\.(out|err)\.println\s*\(', "JAVA-SMELL002", "Using System.out.println instead of standard SLF4J / Logback logger in enterprise code", "LOW", "BAD_PRACTICE"),
+        (r'new\s+Thread\s*\(\s*new\s+Runnable', "JAVA-PERF001", "Manual thread instantiation; prefer Spring TaskExecutor or ExecutorService", "MEDIUM", "BAD_PRACTICE"),
+    ]
+
+    DOTNET_CSHARP_PATTERNS = [
+        (r'SqlCommand\s*\(\s*["\'].*?\b(SELECT|INSERT|UPDATE|DELETE)\b.*?["\']\s*\+', "NET-SEC001", "Potential SQL injection via raw string concatenation in SqlCommand", "CRITICAL", "SECURITY"),
+        (r'new\s+BinaryFormatter\s*\(', "NET-SEC002", "BinaryFormatter is insecure and obsolete; susceptible to arbitrary remote code execution", "CRITICAL", "SECURITY"),
+        (r'\.Result\b|\.Wait\s*\(\s*\)', "NET-PERF001", "Synchronous blocking on async task (.Result / .Wait()) causes thread pool starvation and deadlocks", "HIGH", "BAD_PRACTICE"),
+        (r'catch\s*(\([^\)]*\))?\s*\{\s*\}', "NET-BUG001", "Empty catch block swallowing C# exceptions silently", "HIGH", "BUG"),
+        (r'Console\.WriteLine\s*\(', "NET-SMELL001", "Direct Console.WriteLine instead of ILogger in .NET application", "LOW", "BAD_PRACTICE"),
+    ]
+
+    PHP_SYMFONY_PATTERNS = [
+        (r'\$(_(GET|POST|REQUEST|COOKIE))\s*\[', "PHP-SEC001", "Direct access to raw superglobals; in Symfony, use Request $request->query / ->request methods", "HIGH", "SECURITY"),
+        (r'["\'].*?\b(SELECT|FROM|UPDATE|DELETE)\b.*?["\']\s*\.\s*\$', "PHP-SEC002", "Doctrine SQL/DQL injection through string concatenation; use setParameter()", "CRITICAL", "SECURITY"),
+        (r'\beval\s*\(', "PHP-SEC003", "Dangerous eval() usage allows arbitrary PHP code execution", "CRITICAL", "SECURITY"),
+        (r'\b(var_dump|print_r|dd)\s*\(', "PHP-SMELL001", "Debug dump function (var_dump/print_r/dd) left in application code", "LOW", "BAD_PRACTICE"),
+        (r'md5\s*\(', "PHP-SEC004", "Weak hashing algorithm MD5 used; use password_hash() with BCRYPT or Argon2id", "HIGH", "SECURITY"),
+    ]
+
+    GO_PATTERNS = [
+        (r'\bexec\.Command\s*\(\s*["\']sh["\']\s*,\s*["\']-c["\']', "GO-SEC001", "Direct shell invocation (sh -c) introduces command injection risks", "HIGH", "SECURITY"),
+        (r'if\s+err\s*!=\s*nil\s*\{\s*\}', "GO-BUG001", "Error check ignores error with empty block", "HIGH", "BUG"),
+        (r'db\.(Query|Exec)\s*\(\s*fmt\.Sprintf\s*\(', "GO-SEC002", "SQL query constructed with fmt.Sprintf instead of prepared statement parameters", "CRITICAL", "SECURITY"),
     ]
 
     def analyze_file(self, file_path: str, root_dir: str = "") -> Dict[str, Any]:
-        """Analyzes a single source file and returns defects and complexity metrics."""
         path = Path(file_path)
         if not path.is_file():
             return {"file_path": file_path, "defects": [], "metrics": {}}
@@ -67,13 +107,20 @@ class StaticAnalyzer:
 
         defects = []
         ext = path.suffix.lower()
-
         metrics = ComplexityCalculator.calculate_metrics(content, file_path)
 
         if ext == ".py":
             defects.extend(self._analyze_python(content, rel_path, metrics))
         elif ext in (".js", ".jsx", ".ts", ".tsx"):
-            defects.extend(self._analyze_javascript(content, rel_path, metrics))
+            defects.extend(self._analyze_javascript_typescript(content, rel_path, metrics))
+        elif ext in (".java",):
+            defects.extend(self._analyze_java(content, rel_path, metrics))
+        elif ext in (".cs",):
+            defects.extend(self._analyze_csharp(content, rel_path, metrics))
+        elif ext in (".php",):
+            defects.extend(self._analyze_php(content, rel_path, metrics))
+        elif ext in (".go",):
+            defects.extend(self._analyze_go(content, rel_path, metrics))
         else:
             defects.extend(self._analyze_generic(content, rel_path))
 
@@ -83,10 +130,10 @@ class StaticAnalyzer:
                 "line_number": 1,
                 "rule_id": "SMELL-LOC",
                 "title": f"File is too large ({metrics['loc']} lines)",
-                "description": f"File exceeds the recommended maximum of {settings.max_file_lines} lines. Consider breaking it down into smaller, cohesive modules.",
+                "description": f"File exceeds recommended threshold of {settings.max_file_lines} lines. Split into smaller modules.",
                 "category": "BAD_PRACTICE",
                 "severity": "LOW",
-                "code_snippet": f"# Total lines: {metrics['loc']}"
+                "code_snippet": f"Total lines: {metrics['loc']}"
             })
 
         if metrics.get("maintainability_index", 100) < 40:
@@ -95,10 +142,10 @@ class StaticAnalyzer:
                 "line_number": 1,
                 "rule_id": "SMELL-MI",
                 "title": f"Low Maintainability Index ({metrics['maintainability_index']}/100)",
-                "description": "Code has low maintainability according to Halstead and cyclomatic metrics. High refactoring priority.",
+                "description": "Code has low maintainability according to Halstead and cyclomatic metrics. Refactoring recommended.",
                 "category": "COMPLEXITY",
                 "severity": "MEDIUM",
-                "code_snippet": f"# Maintainability Index: {metrics['maintainability_index']}"
+                "code_snippet": f"Maintainability Index: {metrics['maintainability_index']}"
             })
 
         return {
@@ -131,6 +178,7 @@ class StaticAnalyzer:
         defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.SECRET_PATTERNS))
         defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.SQL_PATTERNS))
         defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.UNSAFE_CALLS))
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.AI_DATA_SCIENCE_PATTERNS))
 
         for func in metrics.get("functions", []):
             if func["cyclomatic"] > settings.max_cyclomatic_complexity:
@@ -141,7 +189,7 @@ class StaticAnalyzer:
                     "end_line": func["end_line"],
                     "rule_id": "COMPLEXITY001",
                     "title": f"High Cyclomatic Complexity in '{func['name']}' (CC: {func['cyclomatic']})",
-                    "description": f"Function '{func['name']}' has a cyclomatic complexity of {func['cyclomatic']} (threshold is {settings.max_cyclomatic_complexity}). It contains too many branching paths and is prone to hidden bugs.",
+                    "description": f"Function '{func['name']}' has a cyclomatic complexity of {func['cyclomatic']} (threshold is {settings.max_cyclomatic_complexity}).",
                     "category": "COMPLEXITY",
                     "severity": "HIGH",
                     "code_snippet": snippet
@@ -154,7 +202,7 @@ class StaticAnalyzer:
                     "end_line": func["end_line"],
                     "rule_id": "SMELL-GOD-FUNC",
                     "title": f"Long Function Smell in '{func['name']}' ({func['lines']} lines)",
-                    "description": f"Function '{func['name']}' is {func['lines']} lines long (max recommended: {settings.max_function_lines}). Break it into smaller single-responsibility methods.",
+                    "description": f"Function '{func['name']}' is {func['lines']} lines long (max recommended: {settings.max_function_lines}).",
                     "category": "BAD_PRACTICE",
                     "severity": "MEDIUM",
                     "code_snippet": snippet
@@ -177,7 +225,7 @@ class StaticAnalyzer:
                             "end_line": line,
                             "rule_id": "BUG002",
                             "title": "Mutable Default Argument",
-                            "description": f"Function '{node.name}' uses a mutable default argument ({type(arg).__name__}). In Python, default arguments are evaluated once at definition time and shared across calls, leading to state leakage bugs.",
+                            "description": f"Function '{node.name}' uses a mutable default argument ({type(arg).__name__}). Default arguments are evaluated once at definition time and shared across calls.",
                             "category": "BUG",
                             "severity": "HIGH",
                             "code_snippet": snippet
@@ -214,7 +262,7 @@ class StaticAnalyzer:
                         "end_line": line,
                         "rule_id": "BUG001",
                         "title": "Bare Except Clause Detected",
-                        "description": "Using a bare 'except:' catches all exceptions, including KeyboardInterrupt, SystemExit, and syntax/name errors, disguising fatal defects.",
+                        "description": "Using a bare 'except:' catches all exceptions, including KeyboardInterrupt, SystemExit, and syntax/name errors.",
                         "category": "BUG",
                         "severity": "HIGH",
                         "code_snippet": snippet
@@ -246,7 +294,7 @@ class StaticAnalyzer:
                             "end_line": line,
                             "rule_id": "BUG004",
                             "title": "Comparison with None using '==' instead of 'is'",
-                            "description": "Comparisons with None should always use 'is' or 'is not' instead of equality operators ('==', '!='), as '==' can be overridden by class __eq__ methods.",
+                            "description": "Comparisons with None should always use 'is' or 'is not' instead of equality operators ('==', '!=').",
                             "category": "BUG",
                             "severity": "LOW",
                             "code_snippet": snippet
@@ -257,11 +305,49 @@ class StaticAnalyzer:
         visitor.visit(tree)
         return defects
 
-    def _analyze_javascript(self, code: str, rel_path: str, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_javascript_typescript(self, code: str, rel_path: str, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
         defects = []
         lines = code.splitlines()
-        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.JS_PATTERNS))
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.JS_TS_ANGULAR_REACT_PATTERNS))
+        self._check_nesting(lines, rel_path, defects, "JS-SMELL-NEST")
+        return defects
 
+    def _analyze_java(self, code: str, rel_path: str, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
+        defects = []
+        lines = code.splitlines()
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.SECRET_PATTERNS))
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.JAVA_SPRING_PATTERNS))
+        self._check_nesting(lines, rel_path, defects, "JAVA-SMELL-NEST")
+        return defects
+
+    def _analyze_csharp(self, code: str, rel_path: str, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
+        defects = []
+        lines = code.splitlines()
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.SECRET_PATTERNS))
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.DOTNET_CSHARP_PATTERNS))
+        self._check_nesting(lines, rel_path, defects, "NET-SMELL-NEST")
+        return defects
+
+    def _analyze_php(self, code: str, rel_path: str, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
+        defects = []
+        lines = code.splitlines()
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.SECRET_PATTERNS))
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.PHP_SYMFONY_PATTERNS))
+        self._check_nesting(lines, rel_path, defects, "PHP-SMELL-NEST")
+        return defects
+
+    def _analyze_go(self, code: str, rel_path: str, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
+        defects = []
+        lines = code.splitlines()
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.SECRET_PATTERNS))
+        defects.extend(self._scan_regex_patterns(code, lines, rel_path, self.GO_PATTERNS))
+        return defects
+
+    def _analyze_generic(self, code: str, rel_path: str) -> List[Dict[str, Any]]:
+        lines = code.splitlines()
+        return self._scan_regex_patterns(code, lines, rel_path, self.SECRET_PATTERNS)
+
+    def _check_nesting(self, lines: List[str], rel_path: str, defects: List[Dict[str, Any]], rule_id: str):
         for i, line in enumerate(lines, 1):
             indent_spaces = len(line) - len(line.lstrip(" "))
             indent_tabs = len(line) - len(line.lstrip("\t"))
@@ -270,25 +356,20 @@ class StaticAnalyzer:
                     "file_path": rel_path,
                     "line_number": i,
                     "end_line": i,
-                    "rule_id": "JS-SMELL-NEST",
-                    "title": "Excessive Callback/Nesting Depth",
-                    "description": "Deeply nested code detected (callback hell / nested blocks). Consider using async/await or extracting helper functions.",
+                    "rule_id": rule_id,
+                    "title": "Excessive Block / Nesting Depth",
+                    "description": "Deeply nested code detected. Consider refactoring into early returns or separate helper methods.",
                     "category": "COMPLEXITY",
                     "severity": "MEDIUM",
                     "code_snippet": line.strip()
                 })
                 break
-        return defects
-
-    def _analyze_generic(self, code: str, rel_path: str) -> List[Dict[str, Any]]:
-        lines = code.splitlines()
-        return self._scan_regex_patterns(code, lines, rel_path, self.SECRET_PATTERNS)
 
     def _scan_regex_patterns(self, code: str, lines: List[str], rel_path: str, patterns) -> List[Dict[str, Any]]:
         defects = []
         for pattern_str, rule_id, title, severity, category in patterns:
             try:
-                for match in re.finditer(pattern_str, code):
+                for match in re.finditer(pattern_str, code, re.IGNORECASE if ("SQL" in rule_id or "SPRING" in rule_id or "PHP" in rule_id or "NET" in rule_id) else 0):
                     line_no = code[:match.start()].count("\n") + 1
                     snippet = lines[line_no - 1] if line_no <= len(lines) else match.group(0)
                     

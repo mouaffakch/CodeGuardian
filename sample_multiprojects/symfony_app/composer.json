@@ -1,0 +1,6 @@
+{
+  "name": "symfony/sample-project",
+  "require": {
+    "symfony/http-foundation": "5.4.30"
+  }
+}

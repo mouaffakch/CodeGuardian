@@ -29,13 +29,16 @@ router = APIRouter(prefix="/api/scans", tags=["Scans"])
 
 EXCLUDED_DIRS = {
     ".git", ".venv", "venv", "node_modules", "__pycache__",
-    ".pytest_cache", "dist", "build", ".next", ".system_generated", "brain"
+    ".pytest_cache", "dist", "build", ".next", ".system_generated", "brain",
+    "vendor", "bin", "obj", ".idea", ".vscode", "target"
 }
-SUPPORTED_EXTENSIONS = {".py", ".js", ".jsx", ".ts", ".tsx", ".json", ".yaml", ".yml", ".sql"}
+SUPPORTED_EXTENSIONS = {
+    ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".cs", ".php", ".go",
+    ".json", ".yaml", ".yml", ".sql", ".html", ".xml"
+}
 
 @router.post("/run", response_model=AnalysisRunDetailResponse)
 def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
-    """Triggers static analysis, duplication scanning, Git history churn, and AI bug prediction."""
     start_time = time.time()
     
     target_dir = Path(req.target_path) if req.target_path else WORKSPACE_ROOT
@@ -227,13 +230,11 @@ def run_scan(req: ScanRequest, db: Session = Depends(get_db)):
 
 @router.get("", response_model=List[AnalysisRunResponse])
 def list_scans(limit: int = 20, db: Session = Depends(get_db)):
-    """List recent scan executions."""
     runs = db.query(AnalysisRun).order_by(AnalysisRun.created_at.desc()).limit(limit).all()
     return runs
 
 @router.get("/{run_id}", response_model=AnalysisRunDetailResponse)
 def get_run_detail(run_id: int, db: Session = Depends(get_db)):
-    """Get full details of a specific analysis run."""
     run = db.query(AnalysisRun).filter(AnalysisRun.id == run_id).first()
     if not run:
         raise HTTPException(status_code=404, detail="Analysis run not found")
@@ -286,7 +287,6 @@ def get_run_detail(run_id: int, db: Session = Depends(get_db)):
 
 @router.get("/dashboard/stats", response_model=DashboardSummaryResponse)
 def get_dashboard_stats(db: Session = Depends(get_db)):
-    """Computes global aggregated statistics for dashboard."""
     total_projects = db.query(Project).count()
     total_scans = db.query(AnalysisRun).count()
     recent_runs = db.query(AnalysisRun).order_by(AnalysisRun.created_at.desc()).limit(5).all()
